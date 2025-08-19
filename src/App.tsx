@@ -16,10 +16,19 @@ import NotFound from "./pages/NotFound";
 
 // Cadastros
 import Campanhas from "./pages/cadastros/Campanhas";
+import Criativos from "./pages/cadastros/Criativos";
+import Clientes from "./pages/cadastros/Clientes";
+import Chatbots from "./pages/cadastros/Chatbots";
 
 // Operacional  
 import LeadsKanban from "./pages/operacional/LeadsKanban";
 import AtendimentoOperacional from "./pages/operacional/Atendimento";
+import Orcamentos from "./pages/operacional/Orcamentos";
+
+// Dashboards
+import DashboardFinanceiro from "./pages/dashboards/Financeiro";
+import DashboardComercial from "./pages/dashboards/Comercial";
+import DashboardOperacional from "./pages/dashboards/Operacional";
 
 const queryClient = new QueryClient();
 
@@ -37,20 +46,20 @@ const App = () => (
             
             {/* Cadastros */}
             <Route path="/cadastros/campanhas" element={<Campanhas />} />
-            <Route path="/cadastros/criativos" element={<div className="p-8">Criativos - Em desenvolvimento</div>} />
-            <Route path="/cadastros/clientes" element={<div className="p-8">Clientes - Em desenvolvimento</div>} />
-            <Route path="/cadastros/chatbots" element={<div className="p-8">Chatbots - Em desenvolvimento</div>} />
+            <Route path="/cadastros/criativos" element={<Criativos />} />
+            <Route path="/cadastros/clientes" element={<Clientes />} />
+            <Route path="/cadastros/chatbots" element={<Chatbots />} />
             
             {/* Operacional */}
             <Route path="/operacional/leads" element={<LeadsKanban />} />
             <Route path="/operacional/atendimento" element={<AtendimentoOperacional />} />
-            <Route path="/operacional/orcamentos" element={<div className="p-8">Orçamentos - Em desenvolvimento</div>} />
+            <Route path="/operacional/orcamentos" element={<Orcamentos />} />
             <Route path="/operacional/pedidos" element={<Pedidos />} />
             
             {/* Dashboards */}
-            <Route path="/dashboards/financeiro" element={<div className="p-8">Dashboard Financeiro - Em desenvolvimento</div>} />
-            <Route path="/dashboards/comercial" element={<div className="p-8">Dashboard Comercial - Em desenvolvimento</div>} />
-            <Route path="/dashboards/operacional" element={<div className="p-8">Dashboard Operacional - Em desenvolvimento</div>} />
+            <Route path="/dashboards/financeiro" element={<DashboardFinanceiro />} />
+            <Route path="/dashboards/comercial" element={<DashboardComercial />} />
+            <Route path="/dashboards/operacional" element={<DashboardOperacional />} />
             
             {/* Legacy routes */}
             <Route path="/leads" element={<Leads />} />
