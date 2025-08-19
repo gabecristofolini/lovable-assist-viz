@@ -1,4 +1,151 @@
 export const mockData = {
+  // Métricas em tempo real
+  metrics: {
+    leadsHoje: 47,
+    atendimentosAbertos: 12,
+    pedidosHoje: 34,
+    faturamentoHoje: 148500,
+    metaDiaria: 150000,
+    taxaConversao: 34,
+    ticketMedio: 4850,
+    atendimentosResolvidosHoje: 45,
+    leadsAtivos: 127,
+    tempoMedioResposta: 3.2,
+    slaAtendimento: 94
+  },
+
+  // Campanhas
+  campanhas: [
+    {
+      id: 1,
+      nome: "Black Friday 2024",
+      canal: "Meta",
+      investimento: 15000,
+      leads: 234,
+      conversoes: 78,
+      roi: 320,
+      status: "ativa",
+      dataInicio: "01/11/2024",
+      dataFim: "30/11/2024",
+      impressoes: 125000,
+      cliques: 2340,
+      ctr: 1.87,
+      cpc: 6.41
+    },
+    {
+      id: 2,
+      nome: "Google Shopping Q1",
+      canal: "Google",
+      investimento: 28000,
+      leads: 189,
+      conversoes: 56,
+      roi: 280,
+      status: "ativa",
+      dataInicio: "01/01/2024",
+      dataFim: "31/03/2024",
+      impressoes: 89000,
+      cliques: 1890,
+      ctr: 2.12,
+      cpc: 14.81
+    },
+    {
+      id: 3,
+      nome: "TikTok Influencers",
+      canal: "TikTok",
+      investimento: 12000,
+      leads: 412,
+      conversoes: 145,
+      roi: 450,
+      status: "pausada",
+      dataInicio: "15/10/2024",
+      dataFim: "15/12/2024",
+      impressoes: 245000,
+      cliques: 4120,
+      ctr: 1.68,
+      cpc: 2.91
+    }
+  ],
+
+  // Criativos
+  criativos: [
+    {
+      id: 1,
+      nome: "Banner Black Friday A",
+      tipo: "imagem",
+      formato: "1080x1080",
+      campanhaId: 1,
+      campanha: "Black Friday 2024",
+      status: "aprovado",
+      impressoes: 45000,
+      cliques: 890,
+      conversoes: 34,
+      ctr: 1.98,
+      taxa_conversao: 3.82,
+      url_preview: "/api/placeholder/300/300"
+    },
+    {
+      id: 2,
+      nome: "Vídeo TikTok Produto",
+      tipo: "video",
+      formato: "9:16",
+      campanhaId: 3,
+      campanha: "TikTok Influencers",
+      status: "aprovado",
+      impressoes: 125000,
+      cliques: 2100,
+      conversoes: 87,
+      ctr: 1.68,
+      taxa_conversao: 4.14,
+      url_preview: "/api/placeholder/300/400"
+    }
+  ],
+
+  // Clientes expandidos
+  clientes: [
+    {
+      id: 1,
+      nome: "Carlos Mendes",
+      email: "carlos@techbrasil.com",
+      telefone: "(11) 98765-4321",
+      empresa: "Tech Brasil Ltda",
+      cnpj: "12.345.678/0001-90",
+      segmento: "B2B",
+      porte: "Médio",
+      setor: "Tecnologia",
+      tags: ["Recorrente", "Premium"],
+      score: 4,
+      ultimoContato: "2024-01-19",
+      valorTotalPedidos: 145000,
+      status: "ativo",
+      desde: "2022-03-15"
+    }
+  ],
+
+  // Chatbots
+  chatbots: [
+    {
+      id: 1,
+      nome: "Bot Atendimento WhatsApp",
+      canal: "whatsapp",
+      status: "ativo",
+      gatilhos: ["palavra-chave: orçamento", "fora do horário"],
+      taxa_resolucao: 68,
+      interacoes_dia: 245,
+      fluxo_preview: "Saudação → Captar interesse → Direcionar para humano"
+    },
+    {
+      id: 2,
+      nome: "Chat Website",
+      canal: "site",
+      status: "ativo",
+      gatilhos: ["tempo na página > 30s", "tentativa de sair"],
+      taxa_resolucao: 45,
+      interacoes_dia: 89,
+      fluxo_preview: "Oferecer ajuda → Capturar lead → Agendar contato"
+    }
+  ],
+
+  // Leads com origem
   leads: [
     { 
       id: 1, 
@@ -7,9 +154,18 @@ export const mockData = {
       email: "joao@techsolutions.com",
       telefone: "(11) 99999-1234",
       status: "novo", 
+      temperatura: "quente",
       valor: 15000,
       responsavel: "Ana Silva",
-      ultimaInteracao: "Há 2 horas"
+      ultimaInteracao: "Há 2 horas",
+      origem: {
+        campanha: "Black Friday 2024",
+        criativo: "Banner A",
+        canal: "Meta"
+      },
+      dias_no_funil: 2,
+      proximo_contato: "Hoje 14h",
+      tags: ["Primeiro contato", "Interessado em premium"]
     },
     { 
       id: 2, 

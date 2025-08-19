@@ -13,11 +13,38 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Leads', href: '/leads', icon: Users },
-  { name: 'Atendimento', href: '/atendimento', icon: MessageSquare },
-  { name: 'Pedidos', href: '/pedidos', icon: ShoppingCart },
-  { name: 'Relatórios', href: '/relatorios', icon: BarChart3 },
+  {
+    section: 'Geral',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }
+    ]
+  },
+  {
+    section: 'Cadastros',
+    items: [
+      { name: 'Campanhas', href: '/cadastros/campanhas', icon: BarChart3 },
+      { name: 'Criativos', href: '/cadastros/criativos', icon: Users },
+      { name: 'Clientes', href: '/cadastros/clientes', icon: Building2 },
+      { name: 'Chatbots', href: '/cadastros/chatbots', icon: MessageSquare }
+    ]
+  },
+  {
+    section: 'Operacional',
+    items: [
+      { name: 'Leads', href: '/operacional/leads', icon: Users },
+      { name: 'Atendimento', href: '/operacional/atendimento', icon: MessageSquare },
+      { name: 'Orçamentos', href: '/operacional/orcamentos', icon: Users },
+      { name: 'Pedidos', href: '/operacional/pedidos', icon: ShoppingCart }
+    ]
+  },
+  {
+    section: 'Dashboards',
+    items: [
+      { name: 'Financeiro', href: '/dashboards/financeiro', icon: BarChart3 },
+      { name: 'Comercial', href: '/dashboards/comercial', icon: BarChart3 },
+      { name: 'Operacional', href: '/dashboards/operacional', icon: BarChart3 }
+    ]
+  }
 ];
 
 export function Sidebar() {
@@ -50,26 +77,37 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-2">
-        {navigation.map((item) => {
-          const isActive = location.pathname.startsWith(item.href);
-          return (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                collapsed && "justify-center"
-              )}
-            >
-              <item.icon className={cn("h-5 w-5", !collapsed && "mr-3")} />
-              {!collapsed && item.name}
-            </NavLink>
-          );
-        })}
+      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+        {navigation.map((section) => (
+          <div key={section.section}>
+            {!collapsed && (
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3">
+                {section.section}
+              </h3>
+            )}
+            <div className="space-y-1">
+              {section.items.map((item) => {
+                const isActive = location.pathname.startsWith(item.href);
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.href}
+                    className={cn(
+                      "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      collapsed && "justify-center"
+                    )}
+                  >
+                    <item.icon className={cn("h-4 w-4", !collapsed && "mr-3")} />
+                    {!collapsed && item.name}
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}
