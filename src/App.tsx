@@ -14,21 +14,22 @@ import NovoPedido from "./pages/NovoPedido";
 import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
 
-// Cadastros
-import Campanhas from "./pages/cadastros/Campanhas";
-import Criativos from "./pages/cadastros/Criativos";
-import Clientes from "./pages/cadastros/Clientes";
-import Chatbots from "./pages/cadastros/Chatbots";
+// Dashboards
+import DashboardFinanceiro from "./pages/dashboards/Financeiro";
+import DashboardComercial from "./pages/dashboards/Comercial";
+import DashboardOperacional from "./pages/dashboards/Operacional";
+
 
 // Operacional  
 import LeadsKanban from "./pages/operacional/LeadsKanban";
 import AtendimentoOperacional from "./pages/operacional/Atendimento";
 import Orcamentos from "./pages/operacional/Orcamentos";
 
-// Dashboards
-import DashboardFinanceiro from "./pages/dashboards/Financeiro";
-import DashboardComercial from "./pages/dashboards/Comercial";
-import DashboardOperacional from "./pages/dashboards/Operacional";
+// Cadastros
+import Campanhas from "./pages/cadastros/Campanhas";
+import Criativos from "./pages/cadastros/Criativos";
+import Clientes from "./pages/cadastros/Clientes";
+import Chatbots from "./pages/cadastros/Chatbots";
 
 const queryClient = new QueryClient();
 
