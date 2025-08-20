@@ -14,18 +14,11 @@ import { cn } from '@/lib/utils';
 
 const navigation = [
   {
-    section: 'Geral',
+    section: 'Dashboards',
     items: [
-      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }
-    ]
-  },
-  {
-    section: 'Cadastros',
-    items: [
-      { name: 'Campanhas', href: '/cadastros/campanhas', icon: BarChart3 },
-      { name: 'Criativos', href: '/cadastros/criativos', icon: Users },
-      { name: 'Clientes', href: '/cadastros/clientes', icon: Building2 },
-      { name: 'Chatbots', href: '/cadastros/chatbots', icon: MessageSquare }
+      { name: 'Financeiro', href: '/dashboards/financeiro', icon: BarChart3 },
+      { name: 'Comercial', href: '/dashboards/comercial', icon: BarChart3 },
+      { name: 'Operacional', href: '/dashboards/operacional', icon: BarChart3 }
     ]
   },
   {
@@ -38,11 +31,12 @@ const navigation = [
     ]
   },
   {
-    section: 'Dashboards',
+    section: 'Cadastros',
     items: [
-      { name: 'Financeiro', href: '/dashboards/financeiro', icon: BarChart3 },
-      { name: 'Comercial', href: '/dashboards/comercial', icon: BarChart3 },
-      { name: 'Operacional', href: '/dashboards/operacional', icon: BarChart3 }
+      { name: 'Campanhas', href: '/cadastros/campanhas', icon: BarChart3 },
+      { name: 'Criativos', href: '/cadastros/criativos', icon: Users },
+      { name: 'Clientes', href: '/cadastros/clientes', icon: Building2 },
+      { name: 'Chatbots', href: '/cadastros/chatbots', icon: MessageSquare }
     ]
   }
 ];
