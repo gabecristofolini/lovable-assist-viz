@@ -41,24 +41,26 @@ const App = () => (
       <BrowserRouter>
         <Layout>
           <Routes>
-
-           {/* Dashboards */}
-            <Route path="/dashboards/financeiro" element={<DashboardFinanceiro />} />
-            <Route path="/dashboards/comercial" element={<DashboardComercial />} />
-            <Route path="/dashboards/operacional" element={<DashboardOperacional />} />
-
-             {/* Operacional */}
-            <Route path="/operacional/leads" element={<LeadsKanban />} />
-            <Route path="/operacional/atendimento" element={<AtendimentoOperacional />} />
-            <Route path="/operacional/orcamentos" element={<Orcamentos />} />
-            <Route path="/operacional/pedidos" element={<Pedidos />} />
-                   
+            <Route path="/" element={<Login />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            
             {/* Cadastros */}
             <Route path="/cadastros/campanhas" element={<Campanhas />} />
             <Route path="/cadastros/criativos" element={<Criativos />} />
             <Route path="/cadastros/clientes" element={<Clientes />} />
             <Route path="/cadastros/chatbots" element={<Chatbots />} />
             
+            {/* Operacional */}
+            <Route path="/operacional/leads" element={<LeadsKanban />} />
+            <Route path="/operacional/atendimento" element={<AtendimentoOperacional />} />
+            <Route path="/operacional/orcamentos" element={<Orcamentos />} />
+            <Route path="/operacional/pedidos" element={<Pedidos />} />
+            
+            {/* Dashboards */}
+            <Route path="/dashboards/financeiro" element={<DashboardFinanceiro />} />
+            <Route path="/dashboards/comercial" element={<DashboardComercial />} />
+            <Route path="/dashboards/operacional" element={<DashboardOperacional />} />
             
             {/* Legacy routes */}
             <Route path="/leads" element={<Leads />} />
