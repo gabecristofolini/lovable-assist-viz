@@ -310,6 +310,7 @@ export default function LeadsKanban() {
           onView={handleView}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onRowClick={handleView}
         />
       ) : (
         <div className="flex gap-6 overflow-x-auto pb-4">

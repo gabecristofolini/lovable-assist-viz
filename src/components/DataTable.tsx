@@ -31,6 +31,7 @@ interface DataTableProps {
   onView?: (item: any) => void;
   onEdit?: (item: any) => void;
   onDelete?: (item: any) => void;
+  onRowClick?: (item: any) => void;
 }
 
 export function DataTable({ 
@@ -39,7 +40,8 @@ export function DataTable({
   title, 
   onView, 
   onEdit, 
-  onDelete 
+  onDelete,
+  onRowClick 
 }: DataTableProps) {
   return (
     <Card>
@@ -63,7 +65,11 @@ export function DataTable({
             </TableHeader>
             <TableBody>
               {data.map((row, index) => (
-                <TableRow key={index} className="hover:bg-muted/50">
+                <TableRow 
+                  key={index} 
+                  className={`hover:bg-muted/50 ${onRowClick ? 'cursor-pointer' : ''}`}
+                  onClick={() => onRowClick?.(row)}
+                >
                   {columns.map((column) => (
                     <TableCell key={column.key}>
                       {column.render 
