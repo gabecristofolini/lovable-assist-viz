@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Phone, Mail, MapPin, User, Building2, Calendar, DollarSign, MessageSquare, FileText, Users, Clock } from 'lucide-react';
+import { WhatsAppChat } from '@/components/WhatsAppChat';
 
 interface Conversa {
   id: number;
@@ -15,6 +16,7 @@ interface Conversa {
   hora: string;
   naoLidas: number;
   online: boolean;
+  canal: string;
 }
 
 interface AtendimentoDetailsModalProps {
@@ -75,13 +77,23 @@ export function AtendimentoDetailsModal({ conversa, open, onOpenChange }: Atendi
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="dados" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="conversa" className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="conversa">Conversa</TabsTrigger>
             <TabsTrigger value="dados">Dados Básicos</TabsTrigger>
             <TabsTrigger value="historico">Histórico</TabsTrigger>
             <TabsTrigger value="orcamentos">Orçamentos</TabsTrigger>
             <TabsTrigger value="origem">Origem</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="conversa" className="mt-4">
+            <div className="h-[600px] border rounded-lg overflow-hidden">
+              <WhatsAppChat 
+                conversa={conversa}
+                onSendMessage={(message) => console.log('Mensagem enviada:', message)}
+              />
+            </div>
+          </TabsContent>
 
           <TabsContent value="dados" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
