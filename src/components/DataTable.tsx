@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { 
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,7 @@ import {
 interface Column {
   key: string;
   label: string;
+  sortable?: boolean;
   render?: (value: any, row: any) => ReactNode;
 }
 
@@ -43,6 +44,35 @@ export function DataTable({
   onDelete,
   onRowClick 
 }: DataTableProps) {
+  const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
+
+  const sortedData = [...data].sort((a, b) => {
+    if (!sortConfig) return 0;
+    
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+    
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key: string) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return <ArrowUpDown className="h-4 w-4" />;
+    }
+    return sortConfig.direction === 'asc' ? 
+      <ArrowUp className="h-4 w-4" /> : 
+      <ArrowDown className="h-4 w-4" />;
+  };
   return (
     <Card>
       {title && (
@@ -56,7 +86,16 @@ export function DataTable({
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
-                  <TableHead key={column.key}>{column.label}</TableHead>
+                  <TableHead 
+                    key={column.key}
+                    className={column.sortable ? "cursor-pointer select-none hover:bg-muted/50" : ""}
+                    onClick={column.sortable ? () => handleSort(column.key) : undefined}
+                  >
+                    <div className="flex items-center gap-2">
+                      {column.label}
+                      {column.sortable && getSortIcon(column.key)}
+                    </div>
+                  </TableHead>
                 ))}
                 {(onView || onEdit || onDelete) && (
                   <TableHead className="w-12">Ações</TableHead>
@@ -64,7 +103,7 @@ export function DataTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((row, index) => (
+              {sortedData.map((row, index) => (
                 <TableRow 
                   key={index} 
                   className={`hover:bg-muted/50 ${onRowClick ? 'cursor-pointer' : ''}`}

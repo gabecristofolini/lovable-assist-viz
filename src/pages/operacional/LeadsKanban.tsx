@@ -21,6 +21,8 @@ import {
 export default function LeadsKanban() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [responsavelFilter, setResponsavelFilter] = useState('all');
+  const [valorFilter, setValorFilter] = useState('all');
   const [view, setView] = useState<'list' | 'kanban'>('kanban');
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -40,13 +42,19 @@ export default function LeadsKanban() {
                          lead.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lead.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesResponsavel = responsavelFilter === 'all' || lead.responsavel === responsavelFilter;
+    const matchesValor = valorFilter === 'all' || 
+      (valorFilter === 'baixo' && lead.valor < 10000) ||
+      (valorFilter === 'medio' && lead.valor >= 10000 && lead.valor < 50000) ||
+      (valorFilter === 'alto' && lead.valor >= 50000);
+    return matchesSearch && matchesStatus && matchesResponsavel && matchesValor;
   });
 
   const columns = [
     {
       key: 'nome',
       label: 'Nome',
+      sortable: true,
       render: (value: string, row: any) => (
         <div>
           <div className="font-medium">{value}</div>
@@ -57,6 +65,7 @@ export default function LeadsKanban() {
     {
       key: 'email',
       label: 'Email',
+      sortable: true,
     },
     {
       key: 'telefone',
@@ -77,15 +86,18 @@ export default function LeadsKanban() {
     {
       key: 'valor',
       label: 'Valor',
+      sortable: true,
       render: (value: number) => `R$ ${value.toLocaleString()}`,
     },
     {
       key: 'responsavel',
       label: 'Responsável',
+      sortable: true,
     },
     {
       key: 'ultimaInteracao',
       label: 'Última Interação',
+      sortable: true,
     },
   ];
 
@@ -298,6 +310,29 @@ export default function LeadsKanban() {
             <SelectItem value="qualificado">Qualificado</SelectItem>
             <SelectItem value="negociacao">Negociação</SelectItem>
             <SelectItem value="perdido">Perdido</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Responsável" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="Ana Silva">Ana Silva</SelectItem>
+            <SelectItem value="João Santos">João Santos</SelectItem>
+            <SelectItem value="Pedro Silva">Pedro Silva</SelectItem>
+            <SelectItem value="Maria Silva">Maria Silva</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={valorFilter} onValueChange={setValorFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Valor" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os valores</SelectItem>
+            <SelectItem value="baixo">Até R$ 10.000</SelectItem>
+            <SelectItem value="medio">R$ 10.000 - R$ 50.000</SelectItem>
+            <SelectItem value="alto">Acima de R$ 50.000</SelectItem>
           </SelectContent>
         </Select>
       </div>

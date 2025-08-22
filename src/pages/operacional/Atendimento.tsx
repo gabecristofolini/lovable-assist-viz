@@ -22,6 +22,8 @@ import {
 export default function Atendimento() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [canalFilter, setCanalFilter] = useState('all');
+  const [responsavelFilter, setResponsavelFilter] = useState('all');
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [selectedConversa, setSelectedConversa] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -117,13 +119,16 @@ export default function Atendimento() {
                          conversa.telefone.includes(searchTerm) ||
                          conversa.empresa.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || conversa.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesCanal = canalFilter === 'all' || conversa.canal === canalFilter;
+    const matchesResponsavel = responsavelFilter === 'all' || conversa.responsavel === responsavelFilter;
+    return matchesSearch && matchesStatus && matchesCanal && matchesResponsavel;
   });
 
   const columns = [
     {
       key: 'nome',
       label: 'Cliente',
+      sortable: true,
       render: (value: string, row: any) => (
         <div className="flex items-center space-x-3">
           <CustomerAvatar name={value} size="sm" online={row.online} />
@@ -167,6 +172,7 @@ export default function Atendimento() {
     {
       key: 'naoLidas',
       label: 'Não Lidas',
+      sortable: true,
       render: (value: number) => value > 0 ? (
         <Badge className="bg-red-100 text-red-600">{value}</Badge>
       ) : (
@@ -176,10 +182,12 @@ export default function Atendimento() {
     {
       key: 'responsavel',
       label: 'Responsável',
+      sortable: true,
     },
     {
       key: 'hora',
       label: 'Última Atividade',
+      sortable: true,
     },
   ];
 
@@ -418,6 +426,30 @@ export default function Atendimento() {
             <SelectItem value="aguardando_retorno">Aguardando Retorno</SelectItem>
             <SelectItem value="aguardando_cliente">Aguardando Cliente</SelectItem>
             <SelectItem value="finalizado">Finalizado</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={canalFilter} onValueChange={setCanalFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Canal" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os canais</SelectItem>
+            <SelectItem value="whatsapp">WhatsApp</SelectItem>
+            <SelectItem value="instagram">Instagram</SelectItem>
+            <SelectItem value="site">Site</SelectItem>
+            <SelectItem value="telefone">Telefone</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Responsável" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="Ana Silva">Ana Silva</SelectItem>
+            <SelectItem value="João Santos">João Santos</SelectItem>
+            <SelectItem value="Pedro Silva">Pedro Silva</SelectItem>
+            <SelectItem value="Maria Silva">Maria Silva</SelectItem>
           </SelectContent>
         </Select>
       </div>
