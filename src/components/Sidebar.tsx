@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import qualitplacasLogo from '@/assets/qualitplacas-logo.png';
 
 const navigation = [
   {
@@ -47,35 +48,55 @@ export function Sidebar() {
 
   return (
     <div className={cn(
-      "bg-card border-r border-border transition-all duration-300 flex flex-col",
+      "bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col",
       collapsed ? "w-16" : "w-64"
     )}>
       {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border bg-sidebar">
         {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <Building2 className="h-8 w-8 text-primary" />
-            <span className="font-bold text-lg text-foreground">CRM Pro</span>
+          <div className="flex items-center space-x-3">
+            <img 
+              src={qualitplacasLogo} 
+              alt="QUALITPLACAS" 
+              className="h-10 w-10 object-contain"
+            />
+            <div className="flex flex-col">
+              <span className="font-bold text-lg text-sidebar-foreground">QUALITPLACAS</span>
+              <span className="text-xs text-sidebar-foreground/70 font-medium">MDF E ACESSÓRIOS</span>
+            </div>
           </div>
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-md hover:bg-accent transition-colors"
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
+        {collapsed && (
+          <img 
+            src={qualitplacasLogo} 
+            alt="QUALITPLACAS" 
+            className="h-8 w-8 object-contain mx-auto"
+          />
+        )}
+        {!collapsed && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-sidebar-foreground"
+          >
             <ChevronLeft className="h-4 w-4" />
-          )}
-        </button>
+          </button>
+        )}
+        {collapsed && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="absolute top-4 -right-3 p-1.5 rounded-md bg-sidebar border border-sidebar-border hover:bg-sidebar-accent transition-colors text-sidebar-foreground shadow-lg"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto bg-sidebar">
         {navigation.map((section) => (
           <div key={section.section}>
             {!collapsed && (
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3">
+              <h3 className="text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider mb-2 px-3">
                 {section.section}
               </h3>
             )}
@@ -89,8 +110,8 @@ export function Sidebar() {
                     className={cn(
                       "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
                       isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       collapsed && "justify-center"
                     )}
                   >
@@ -105,18 +126,18 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-sidebar-border bg-sidebar">
         <div className={cn(
           "flex items-center space-x-3",
           collapsed && "justify-center"
         )}>
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <span className="text-primary-foreground text-sm font-medium">AS</span>
+          <div className="w-8 h-8 bg-sidebar-primary rounded-full flex items-center justify-center">
+            <span className="text-sidebar-primary-foreground text-sm font-medium">AS</span>
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">Ana Silva</p>
-              <p className="text-xs text-muted-foreground truncate">ana@crmcorp.com</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">Ana Silva</p>
+              <p className="text-xs text-sidebar-foreground/70 truncate">ana@qualitplacas.com</p>
             </div>
           )}
         </div>

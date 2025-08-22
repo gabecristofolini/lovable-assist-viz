@@ -13,7 +13,7 @@ const pageNames: { [key: string]: string } = {
 
 export function Header() {
   const location = useLocation();
-  const pageName = pageNames[location.pathname] || 'CRM Pro';
+  const pageName = pageNames[location.pathname] || 'QUALITPLACAS CRM';
 
   return (
     <header className="h-16 bg-card border-b border-border px-6 flex items-center justify-between">
