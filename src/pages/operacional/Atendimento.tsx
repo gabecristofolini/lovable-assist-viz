@@ -9,6 +9,7 @@ import { AtendimentoDetailsModal } from '@/components/AtendimentoDetailsModal';
 import { QuickStatsGrid } from '@/components/QuickStatsGrid';
 import { PipelineStage } from '@/components/PipelineStage';
 import { CustomerAvatar } from '@/components/CustomerAvatar';
+import { StatusChangeButton } from '@/components/StatusChangeButton';
 import { mockData } from '@/data/mockData';
 import {
   Select,
@@ -85,7 +86,9 @@ export default function Atendimento() {
       sentimento: "neutro",
       empresa: "Indústria ABC",
       email: "ana@industriaabc.com",
-      responsavel: "Pedro Silva"
+      responsavel: "Pedro Silva",
+      motivo: "Não respondeu aos contatos",
+      dataAlteracao: "2024-01-19"
     },
     {
       id: 4,
@@ -152,29 +155,14 @@ export default function Atendimento() {
     {
       key: 'status',
       label: 'Status',
-      render: (value: string) => {
-        const statusColors = {
-          novo: 'bg-blue-100 text-blue-600',
-          em_atendimento: 'bg-green-100 text-green-600',
-          em_negociacao: 'bg-orange-100 text-orange-600',
-          aguardando_retorno: 'bg-yellow-100 text-yellow-600',
-          aguardando_cliente: 'bg-purple-100 text-purple-600',
-          finalizado: 'bg-gray-100 text-gray-600'
-        };
-        const statusLabels = {
-          novo: 'Novo',
-          em_atendimento: 'Em Atendimento',
-          em_negociacao: 'Em Negociação',
-          aguardando_retorno: 'Aguardando Retorno',
-          aguardando_cliente: 'Aguardando Cliente',
-          finalizado: 'Finalizado'
-        };
-        return (
-          <Badge className={statusColors[value as keyof typeof statusColors] || 'bg-gray-100 text-gray-600'}>
-            {statusLabels[value as keyof typeof statusLabels] || value}
-          </Badge>
-        );
-      },
+      render: (value: string, row: any) => (
+        <StatusChangeButton
+          currentStatus={value}
+          itemTitle={`${row.nome} - ${row.empresa}`}
+          tipo="atendimento"
+          onStatusChange={(novoStatus, motivo) => handleStatusChange(row.id, novoStatus, motivo)}
+        />
+      ),
     },
     {
       key: 'naoLidas',
@@ -194,6 +182,11 @@ export default function Atendimento() {
       label: 'Última Atividade',
     },
   ];
+
+  const handleStatusChange = (conversaId: number, novoStatus: string, motivo?: string) => {
+    console.log('Alterando status da conversa:', conversaId, 'para:', novoStatus, 'motivo:', motivo);
+    // Aqui você implementaria a lógica para atualizar o status no backend
+  };
 
   const handleView = (conversa: any) => {
     setSelectedConversa(conversa);

@@ -144,6 +144,15 @@ export function AtendimentoDetailsModal({ conversa, open, onOpenChange }: Atendi
                     <div className="text-sm font-medium">Prioridade</div>
                     <Badge variant="destructive" className="text-xs">Alta</Badge>
                   </div>
+                  {(conversa as any).motivo && (
+                    <div>
+                      <div className="text-sm font-medium">Motivo da Situação</div>
+                      <div className="text-sm text-muted-foreground">{(conversa as any).motivo}</div>
+                      {(conversa as any).dataAlteracao && (
+                        <div className="text-xs text-muted-foreground">Em {(conversa as any).dataAlteracao}</div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

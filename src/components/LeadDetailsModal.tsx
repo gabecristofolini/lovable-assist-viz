@@ -18,6 +18,8 @@ interface Lead {
   valor: number;
   responsavel: string;
   ultimaInteracao: string;
+  motivo?: string;
+  dataAlteracao?: string;
 }
 
 interface LeadDetailsModalProps {
@@ -123,6 +125,15 @@ export function LeadDetailsModal({ lead, open, onOpenChange }: LeadDetailsModalP
                     <div className="text-sm font-medium">Vendedor</div>
                     <div className="text-sm text-muted-foreground">Carlos Mendes</div>
                   </div>
+                  {lead.motivo && (
+                    <div>
+                      <div className="text-sm font-medium">Motivo da Situação</div>
+                      <div className="text-sm text-muted-foreground">{lead.motivo}</div>
+                      {lead.dataAlteracao && (
+                        <div className="text-xs text-muted-foreground">Em {lead.dataAlteracao}</div>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <div className="text-sm font-medium">Valor Potencial</div>
                     <div className="text-lg font-bold text-green-600">R$ {lead.valor.toLocaleString()}</div>

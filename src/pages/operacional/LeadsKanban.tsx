@@ -8,6 +8,7 @@ import { ViewToggle } from '@/components/ViewToggle';
 import { LeadDetailsModal } from '@/components/LeadDetailsModal';
 import { QuickStatsGrid } from '@/components/QuickStatsGrid';
 import { PipelineStage } from '@/components/PipelineStage';
+import { StatusChangeButton } from '@/components/StatusChangeButton';
 import { mockData, getStatusColor, getStatusLabel } from '@/data/mockData';
 import {
   Select,
@@ -26,7 +27,15 @@ export default function LeadsKanban() {
 
   const { leads } = mockData;
 
-  const filteredLeads = leads.filter(lead => {
+  // Expandir leads com informações de motivo
+  const leadsExpandidos = leads.map(lead => ({
+    ...lead,
+    motivo: lead.status === 'perdido' ? 'Preço muito alto' : 
+            lead.status === 'frio' ? 'Não demonstrou interesse' : null,
+    dataAlteracao: lead.status === 'perdido' || lead.status === 'frio' ? '2024-01-20' : null
+  }));
+
+  const filteredLeads = leadsExpandidos.filter(lead => {
     const matchesSearch = lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lead.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lead.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -56,10 +65,13 @@ export default function LeadsKanban() {
     {
       key: 'status',
       label: 'Status',
-      render: (value: string) => (
-        <Badge className={getStatusColor(value)}>
-          {getStatusLabel(value)}
-        </Badge>
+      render: (value: string, row: any) => (
+        <StatusChangeButton
+          currentStatus={value}
+          itemTitle={`${row.nome} - ${row.empresa}`}
+          tipo="lead"
+          onStatusChange={(novoStatus, motivo) => handleStatusChange(row.id, novoStatus, motivo)}
+        />
       ),
     },
     {
@@ -76,6 +88,11 @@ export default function LeadsKanban() {
       label: 'Última Interação',
     },
   ];
+
+  const handleStatusChange = (leadId: number, novoStatus: string, motivo?: string) => {
+    console.log('Alterando status do lead:', leadId, 'para:', novoStatus, 'motivo:', motivo);
+    // Aqui você implementaria a lógica para atualizar o status no backend
+  };
 
   const handleView = (lead: any) => {
     setSelectedLead(lead);
