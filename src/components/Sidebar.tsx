@@ -6,6 +6,7 @@ import {
   ShoppingCart, 
   BarChart3,
   Building2,
+  Package,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -37,7 +38,8 @@ const navigation = [
       { name: 'Campanhas', href: '/cadastros/campanhas', icon: BarChart3 },
       { name: 'Criativos', href: '/cadastros/criativos', icon: Users },
       { name: 'Clientes', href: '/cadastros/clientes', icon: Building2 },
-      { name: 'Chatbots', href: '/cadastros/chatbots', icon: MessageSquare }
+      { name: 'Chatbots', href: '/cadastros/chatbots', icon: MessageSquare },
+      { name: 'Produtos', href: '/cadastros/produtos', icon: Package }
     ]
   }
 ];
