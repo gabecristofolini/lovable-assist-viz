@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Upload, Plus } from 'lucide-react';
+import { Search, Filter, Upload, Plus, Users, Clock, DollarSign, TrendingUp, Flame, Snowflake, Target, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/DataTable';
 import { Badge } from '@/components/ui/badge';
+import { ViewToggle } from '@/components/ViewToggle';
+import { LeadDetailsModal } from '@/components/LeadDetailsModal';
+import { QuickStatsGrid } from '@/components/QuickStatsGrid';
+import { PipelineStage } from '@/components/PipelineStage';
 import { mockData, getStatusColor, getStatusLabel } from '@/data/mockData';
 import {
   Select,
@@ -17,6 +21,9 @@ import {
 export default function Leads() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [view, setView] = useState<'list' | 'kanban'>('list');
+  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const navigate = useNavigate();
 
   const { leads } = mockData;
@@ -73,7 +80,8 @@ export default function Leads() {
   ];
 
   const handleView = (lead: any) => {
-    navigate(`/leads/${lead.id}`);
+    setSelectedLead(lead);
+    setDetailsOpen(true);
   };
 
   const handleEdit = (lead: any) => {
@@ -83,6 +91,149 @@ export default function Leads() {
   const handleDelete = (lead: any) => {
     console.log('Excluindo lead:', lead);
   };
+
+  // Estatísticas rápidas dos leads
+  const leadStats = [
+    {
+      title: 'Novos',
+      value: '12',
+      change: { value: 8, type: 'up' as const },
+      icon: Users,
+      color: 'bg-blue-100 text-blue-600'
+    },
+    {
+      title: 'Em Negociação',
+      value: '8',
+      change: { value: 2, type: 'up' as const },
+      icon: TrendingUp,
+      color: 'bg-orange-100 text-orange-600'
+    },
+    {
+      title: 'Aguardando Retorno',
+      value: '15',
+      change: { value: -5, type: 'down' as const },
+      icon: Clock,
+      color: 'bg-yellow-100 text-yellow-600'
+    },
+    {
+      title: 'Aguardando Cliente',
+      value: '6',
+      change: { value: 12, type: 'up' as const },
+      icon: Target,
+      color: 'bg-purple-100 text-purple-600'
+    },
+    {
+      title: 'Aguardando Orçamento',
+      value: '4',
+      change: { value: -10, type: 'down' as const },
+      icon: DollarSign,
+      color: 'bg-indigo-100 text-indigo-600'
+    },
+    {
+      title: 'Leads Frios',
+      value: '23',
+      change: { value: 15, type: 'up' as const },
+      icon: Snowflake,
+      color: 'bg-cyan-100 text-cyan-600'
+    },
+    {
+      title: 'Leads Quentes',
+      value: '18',
+      change: { value: 5, type: 'up' as const },
+      icon: Flame,
+      color: 'bg-red-100 text-red-600'
+    },
+    {
+      title: 'Leads Fechados',
+      value: '32',
+      change: { value: 22, type: 'up' as const },
+      icon: CheckCircle,
+      color: 'bg-green-100 text-green-600'
+    }
+  ];
+
+  // Organizar leads por estágio para o kanban
+  const stages = {
+    novos: filteredLeads.filter(l => l.status === 'novo'),
+    qualificando: filteredLeads.filter(l => l.status === 'qualificado'),
+    negociacao: filteredLeads.filter(l => l.status === 'negociacao'),
+    perdidos: filteredLeads.filter(l => l.status === 'perdido'),
+  };
+
+  const stageConfig = [
+    {
+      id: 'novos',
+      title: 'Novos',
+      items: stages.novos.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: Math.random() > 0.5 ? 'quente' : 'morno',
+        daysInStage: Math.floor(Math.random() * 7) + 1,
+        nextAction: 'Hoje 14h',
+        avatar: '',
+        tags: ['Meta', 'Premium'],
+        priority: 'alta' as const
+      })),
+      color: 'bg-blue-100',
+      count: stages.novos.length
+    },
+    {
+      id: 'qualificando',
+      title: 'Qualificados',
+      items: stages.qualificando.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: Math.random() > 0.5 ? 'quente' : 'morno',
+        daysInStage: Math.floor(Math.random() * 7) + 1,
+        nextAction: 'Amanhã 10h',
+        avatar: '',
+        tags: ['Google', 'SaaS'],
+        priority: 'normal' as const
+      })),
+      color: 'bg-green-100',
+      count: stages.qualificando.length
+    },
+    {
+      id: 'negociacao',
+      title: 'Em Negociação',
+      items: stages.negociacao.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: Math.random() > 0.5 ? 'quente' : 'morno',
+        daysInStage: Math.floor(Math.random() * 7) + 1,
+        nextAction: 'Hoje 16h',
+        avatar: '',
+        tags: ['TikTok', 'B2B'],
+        priority: 'urgente' as const
+      })),
+      color: 'bg-orange-100',
+      count: stages.negociacao.length
+    },
+    {
+      id: 'perdidos',
+      title: 'Perdidos',
+      items: stages.perdidos.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: 'frio',
+        daysInStage: Math.floor(Math.random() * 30) + 1,
+        nextAction: '-',
+        avatar: '',
+        tags: ['Perdido'],
+        priority: 'baixa' as const
+      })),
+      color: 'bg-red-100',
+      count: stages.perdidos.length
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -94,7 +245,8 @@ export default function Leads() {
             {filteredLeads.length} leads encontrados
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-2">
+          <ViewToggle view={view} onViewChange={setView} />
           <Button variant="outline">
             <Upload className="mr-2 h-4 w-4" />
             Importar CSV
@@ -105,6 +257,9 @@ export default function Leads() {
           </Button>
         </div>
       </div>
+
+      {/* Quick Stats */}
+      <QuickStatsGrid stats={leadStats} columns={8} />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -132,13 +287,38 @@ export default function Leads() {
         </Select>
       </div>
 
-      {/* Data Table */}
-      <DataTable
-        data={filteredLeads}
-        columns={columns}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+      {/* Content - Lista ou Kanban */}
+      {view === 'list' ? (
+        <DataTable
+          data={filteredLeads}
+          columns={columns}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <div className="flex gap-6 overflow-x-auto pb-4">
+          {stageConfig.map((stage) => (
+            <PipelineStage
+              key={stage.id}
+              title={stage.title}
+              count={stage.count}
+              items={stage.items}
+              color={stage.color}
+              onAddItem={() => console.log(`Adicionar lead em ${stage.title}`)}
+              onItemClick={(item) => {
+                const lead = filteredLeads.find(l => l.id === item.id);
+                if (lead) handleView(lead);
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <LeadDetailsModal
+        lead={selectedLead}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
       />
     </div>
   );
