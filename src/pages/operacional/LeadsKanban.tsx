@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Search, Filter, Plus, Zap, Phone, Mail } from 'lucide-react';
+import { Search, Filter, Plus, Upload, Users, Clock, DollarSign, TrendingUp, Flame, Snowflake, Target, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DataTable } from '@/components/DataTable';
+import { Badge } from '@/components/ui/badge';
+import { ViewToggle } from '@/components/ViewToggle';
+import { LeadDetailsModal } from '@/components/LeadDetailsModal';
+import { QuickStatsGrid } from '@/components/QuickStatsGrid';
 import { PipelineStage } from '@/components/PipelineStage';
-import { CustomerAvatar } from '@/components/CustomerAvatar';
-import { StatusBadge } from '@/components/StatusBadge';
-import { mockData } from '@/data/mockData';
+import { mockData, getStatusColor, getStatusLabel } from '@/data/mockData';
 import {
   Select,
   SelectContent,
@@ -16,100 +19,215 @@ import {
 
 export default function LeadsKanban() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [temperaturaFilter, setTemperaturaFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [view, setView] = useState<'list' | 'kanban'>('kanban');
+  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const { leads } = mockData;
 
-  // Dados expandidos para o kanban
-  const leadsKanban = [
+  const filteredLeads = leads.filter(lead => {
+    const matchesSearch = lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         lead.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         lead.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const columns = [
     {
-      id: 1,
-      title: "João Silva - Tech Solutions",
-      subtitle: "Origem: Black Friday > Banner A",
-      value: "R$ 15.000",
-      temperature: "quente",
-      daysInStage: 2,
-      nextAction: "Hoje 14h",
-      avatar: "",
-      tags: ["Meta", "Premium"],
-      priority: "alta" as const
+      key: 'nome',
+      label: 'Nome',
+      render: (value: string, row: any) => (
+        <div>
+          <div className="font-medium">{value}</div>
+          <div className="text-sm text-muted-foreground">{row.empresa}</div>
+        </div>
+      ),
     },
     {
-      id: 2,
-      title: "Ana Costa - Startup XYZ",
-      subtitle: "Origem: Google Shopping > CPC",
-      value: "R$ 25.000",
-      temperature: "morno",
-      daysInStage: 5,
-      nextAction: "Amanhã 10h",
-      avatar: "",
-      tags: ["Google", "SaaS"],
-      priority: "normal" as const
+      key: 'email',
+      label: 'Email',
     },
     {
-      id: 3,
-      title: "Pedro Santos - Indústria ABC",
-      subtitle: "Origem: TikTok > Influencer Post",
-      value: "R$ 45.000",
-      temperature: "quente",
-      daysInStage: 1,
-      nextAction: "Hoje 16h",
-      avatar: "",
-      tags: ["TikTok", "B2B"],
-      priority: "urgente" as const
+      key: 'telefone',
+      label: 'Telefone',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value: string) => (
+        <Badge className={getStatusColor(value)}>
+          {getStatusLabel(value)}
+        </Badge>
+      ),
+    },
+    {
+      key: 'valor',
+      label: 'Valor',
+      render: (value: number) => `R$ ${value.toLocaleString()}`,
+    },
+    {
+      key: 'responsavel',
+      label: 'Responsável',
+    },
+    {
+      key: 'ultimaInteracao',
+      label: 'Última Interação',
+    },
+  ];
+
+  const handleView = (lead: any) => {
+    setSelectedLead(lead);
+    setDetailsOpen(true);
+  };
+
+  const handleEdit = (lead: any) => {
+    console.log('Editando lead:', lead);
+  };
+
+  const handleDelete = (lead: any) => {
+    console.log('Excluindo lead:', lead);
+  };
+
+  // Estatísticas rápidas dos leads
+  const leadStats = [
+    {
+      title: 'Novos',
+      value: '12',
+      change: { value: 8, type: 'up' as const },
+      icon: Users,
+      color: 'bg-blue-100 text-blue-600'
+    },
+    {
+      title: 'Em Negociação',
+      value: '8',
+      change: { value: 2, type: 'up' as const },
+      icon: TrendingUp,
+      color: 'bg-orange-100 text-orange-600'
+    },
+    {
+      title: 'Aguardando Retorno',
+      value: '15',
+      change: { value: -5, type: 'down' as const },
+      icon: Clock,
+      color: 'bg-yellow-100 text-yellow-600'
+    },
+    {
+      title: 'Aguardando Cliente',
+      value: '6',
+      change: { value: 12, type: 'up' as const },
+      icon: Target,
+      color: 'bg-purple-100 text-purple-600'
+    },
+    {
+      title: 'Aguardando Orçamento',
+      value: '4',
+      change: { value: -10, type: 'down' as const },
+      icon: DollarSign,
+      color: 'bg-indigo-100 text-indigo-600'
+    },
+    {
+      title: 'Leads Frios',
+      value: '23',
+      change: { value: 15, type: 'up' as const },
+      icon: Snowflake,
+      color: 'bg-cyan-100 text-cyan-600'
+    },
+    {
+      title: 'Leads Quentes',
+      value: '18',
+      change: { value: 5, type: 'up' as const },
+      icon: Flame,
+      color: 'bg-red-100 text-red-600'
+    },
+    {
+      title: 'Leads Fechados',
+      value: '32',
+      change: { value: 22, type: 'up' as const },
+      icon: CheckCircle,
+      color: 'bg-green-100 text-green-600'
     }
   ];
 
-  // Organizar leads por estágio
+  // Organizar leads por estágio para o kanban
   const stages = {
-    novos: leadsKanban.filter(l => [1].includes(l.id)),
-    qualificando: leadsKanban.filter(l => [2].includes(l.id)),
-    qualificados: leadsKanban.filter(l => [3].includes(l.id)),
-    negociacao: [],
-    convertidos: [],
-    perdidos: []
+    novos: filteredLeads.filter(l => l.status === 'novo'),
+    qualificando: filteredLeads.filter(l => l.status === 'qualificado'),
+    negociacao: filteredLeads.filter(l => l.status === 'negociacao'),
+    perdidos: filteredLeads.filter(l => l.status === 'perdido'),
   };
 
   const stageConfig = [
     {
       id: 'novos',
       title: 'Novos',
-      items: stages.novos,
+      items: stages.novos.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: Math.random() > 0.5 ? 'quente' : 'morno',
+        daysInStage: Math.floor(Math.random() * 7) + 1,
+        nextAction: 'Hoje 14h',
+        avatar: '',
+        tags: ['Meta', 'Premium'],
+        priority: 'alta' as const
+      })),
       color: 'bg-blue-100',
       count: stages.novos.length
     },
     {
       id: 'qualificando',
-      title: 'Qualificando',
-      items: stages.qualificando,
-      color: 'bg-yellow-100',
-      count: stages.qualificando.length
-    },
-    {
-      id: 'qualificados',
       title: 'Qualificados',
-      items: stages.qualificados,
+      items: stages.qualificando.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: Math.random() > 0.5 ? 'quente' : 'morno',
+        daysInStage: Math.floor(Math.random() * 7) + 1,
+        nextAction: 'Amanhã 10h',
+        avatar: '',
+        tags: ['Google', 'SaaS'],
+        priority: 'normal' as const
+      })),
       color: 'bg-green-100',
-      count: stages.qualificados.length
+      count: stages.qualificando.length
     },
     {
       id: 'negociacao',
       title: 'Em Negociação',
-      items: stages.negociacao,
+      items: stages.negociacao.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: Math.random() > 0.5 ? 'quente' : 'morno',
+        daysInStage: Math.floor(Math.random() * 7) + 1,
+        nextAction: 'Hoje 16h',
+        avatar: '',
+        tags: ['TikTok', 'B2B'],
+        priority: 'urgente' as const
+      })),
       color: 'bg-orange-100',
       count: stages.negociacao.length
     },
     {
-      id: 'convertidos',
-      title: 'Convertidos',
-      items: stages.convertidos,
-      color: 'bg-green-200',
-      count: stages.convertidos.length
-    },
-    {
       id: 'perdidos',
       title: 'Perdidos',
-      items: stages.perdidos,
+      items: stages.perdidos.map(lead => ({
+        id: lead.id,
+        title: `${lead.nome} - ${lead.empresa}`,
+        subtitle: `${lead.email}`,
+        value: `R$ ${lead.valor.toLocaleString()}`,
+        temperature: 'frio',
+        daysInStage: Math.floor(Math.random() * 30) + 1,
+        nextAction: '-',
+        avatar: '',
+        tags: ['Perdido'],
+        priority: 'baixa' as const
+      })),
       color: 'bg-red-100',
       count: stages.perdidos.length
     }
@@ -120,15 +238,16 @@ export default function LeadsKanban() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Pipeline de Leads</h1>
+          <h1 className="text-3xl font-bold text-foreground">Leads</h1>
           <p className="text-muted-foreground">
-            Acompanhe a jornada completa dos seus leads
+            {filteredLeads.length} leads encontrados
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-2">
+          <ViewToggle view={view} onViewChange={setView} />
           <Button variant="outline">
-            <Phone className="mr-2 h-4 w-4" />
-            Ligar
+            <Upload className="mr-2 h-4 w-4" />
+            Importar CSV
           </Button>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
@@ -137,15 +256,8 @@ export default function LeadsKanban() {
         </div>
       </div>
 
-      {/* Resumo das Métricas */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        {stageConfig.map((stage) => (
-          <div key={stage.id} className="text-center">
-            <div className="text-2xl font-bold text-foreground">{stage.count}</div>
-            <div className="text-sm text-muted-foreground">{stage.title}</div>
-          </div>
-        ))}
-      </div>
+      {/* Quick Stats */}
+      <QuickStatsGrid stats={leadStats} columns={8} />
 
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-4">
@@ -158,53 +270,54 @@ export default function LeadsKanban() {
             className="pl-10"
           />
         </div>
-        <Select value={temperaturaFilter} onValueChange={setTemperaturaFilter}>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48">
-            <Zap className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Temperatura" />
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Filtrar por status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
-            <SelectItem value="quente">🔥 Quente</SelectItem>
-            <SelectItem value="morno">⚡ Morno</SelectItem>
-            <SelectItem value="frio">❄️ Frio</SelectItem>
+            <SelectItem value="all">Todos os status</SelectItem>
+            <SelectItem value="novo">Novo</SelectItem>
+            <SelectItem value="qualificado">Qualificado</SelectItem>
+            <SelectItem value="negociacao">Negociação</SelectItem>
+            <SelectItem value="perdido">Perdido</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Pipeline Kanban */}
-      <div className="flex gap-6 overflow-x-auto pb-4">
-        {stageConfig.map((stage) => (
-          <PipelineStage
-            key={stage.id}
-            title={stage.title}
-            count={stage.count}
-            items={stage.items}
-            color={stage.color}
-            onAddItem={() => console.log(`Adicionar lead em ${stage.title}`)}
-            onItemClick={(item) => console.log('Clicked item:', item)}
-          />
-        ))}
-      </div>
-
-      {/* Ações Rápidas */}
-      <div className="bg-muted/30 rounded-lg p-4">
-        <h3 className="font-semibold mb-3">Ações Rápidas</h3>
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="outline">
-            <Phone className="mr-2 h-4 w-4" />
-            Ligar para Leads Quentes
-          </Button>
-          <Button size="sm" variant="outline">
-            <Mail className="mr-2 h-4 w-4" />
-            Enviar Follow-up em Massa
-          </Button>
-          <Button size="sm" variant="outline">
-            <Zap className="mr-2 h-4 w-4" />
-            Identificar Leads Frios
-          </Button>
+      {/* Content - Lista ou Kanban */}
+      {view === 'list' ? (
+        <DataTable
+          data={filteredLeads}
+          columns={columns}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <div className="flex gap-6 overflow-x-auto pb-4">
+          {stageConfig.map((stage) => (
+            <PipelineStage
+              key={stage.id}
+              title={stage.title}
+              count={stage.count}
+              items={stage.items}
+              color={stage.color}
+              onAddItem={() => console.log(`Adicionar lead em ${stage.title}`)}
+              onItemClick={(item) => {
+                const lead = filteredLeads.find(l => l.id === item.id);
+                if (lead) handleView(lead);
+              }}
+            />
+          ))}
         </div>
-      </div>
+      )}
+
+      <LeadDetailsModal
+        lead={selectedLead}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+      />
     </div>
   );
 }

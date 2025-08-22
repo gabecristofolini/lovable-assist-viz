@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Send, Paperclip, MoreVertical, Phone, Video, Archive } from 'lucide-react';
+import { Search, Send, Paperclip, MoreVertical, Phone, Video, Archive, Filter, Upload, Plus, Users, Clock, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,65 +8,210 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CustomerAvatar } from '@/components/CustomerAvatar';
 import { ChatBubble } from '@/components/ChatBubble';
 import { StatusBadge } from '@/components/StatusBadge';
+import { ViewToggle } from '@/components/ViewToggle';
+import { AtendimentoDetailsModal } from '@/components/AtendimentoDetailsModal';
+import { QuickStatsGrid } from '@/components/QuickStatsGrid';
+import { DataTable } from '@/components/DataTable';
 import { mockData } from '@/data/mockData';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function Atendimento() {
   const [selectedConversaId, setSelectedConversaId] = useState(1);
   const [newMessage, setNewMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [view, setView] = useState<'list' | 'kanban'>('kanban');
+  const [selectedConversa, setSelectedConversa] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const { conversas, mensagens } = mockData;
 
-  // Conversas expandidas para o novo layout
-  const conversasExpandidas = [
+  // Conversas para a nova funcionalidade
+  const conversasAtendimento = [
     {
       id: 1,
-      cliente: "Maria Santos",
+      nome: "Maria Santos",
+      telefone: "(11) 99999-9999",
+      ultimaMensagem: "Preciso de um orçamento para 50 unidades",
+      hora: "10:45",
+      naoLidas: 3,
+      online: true,
       canal: "whatsapp",
-      status: "online",
+      status: "novo",
       origem_lead: "Black Friday > Banner A",
       cliente_desde: "Novo",
       ultimo_pedido: null,
-      mensagens_nao_lidas: 3,
       tempo_espera: "2 min",
-      ultima_mensagem: "Preciso de um orçamento para 50 unidades",
-      hora: "10:45",
-      avatar: "",
       tags: ["Novo", "Urgente"],
       sentimento: "positivo"
     },
     {
       id: 2,
-      cliente: "Carlos Mendes",
+      nome: "Carlos Mendes",
+      telefone: "(11) 88888-8888",
+      ultimaMensagem: "Obrigado pelo atendimento!",
+      hora: "09:30",
+      naoLidas: 0,
+      online: true,
       canal: "instagram",
-      status: "online",
+      status: "em_atendimento",
       origem_lead: "TikTok > Influencer",
       cliente_desde: "3 anos",
       ultimo_pedido: "R$ 4.500 há 15 dias",
-      mensagens_nao_lidas: 0,
       tempo_espera: null,
-      ultima_mensagem: "Obrigado pelo atendimento!",
-      hora: "09:30",
-      avatar: "",
       tags: ["Premium", "Recorrente"],
       sentimento: "positivo"
     },
     {
       id: 3,
-      cliente: "Ana Costa",
+      nome: "Ana Costa",
+      telefone: "(11) 77777-7777",
+      ultimaMensagem: "Quando vocês conseguem entregar?",
+      hora: "Ontem",
+      naoLidas: 1,
+      online: false,
       canal: "site",
-      status: "offline",
+      status: "aguardando_retorno",
       origem_lead: "Google Ads > CPC",
       cliente_desde: "1 ano",
       ultimo_pedido: "R$ 8.200 há 2 meses",
-      mensagens_nao_lidas: 1,
       tempo_espera: "1h 30min",
-      ultima_mensagem: "Quando vocês conseguem entregar?",
-      hora: "Ontem",
-      avatar: "",
       tags: ["B2B"],
       sentimento: "neutro"
     }
   ];
+
+  const filteredConversas = conversasAtendimento.filter(conversa => {
+    const matchesSearch = conversa.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         conversa.telefone.includes(searchTerm);
+    const matchesStatus = statusFilter === 'all' || conversa.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  // Estatísticas de atendimento
+  const atendimentoStats = [
+    {
+      title: 'Novos',
+      value: '8',
+      change: { value: 12, type: 'up' as const },
+      icon: Users,
+      color: 'bg-blue-100 text-blue-600'
+    },
+    {
+      title: 'Em Atendimento',
+      value: '15',
+      change: { value: 5, type: 'up' as const },
+      icon: TrendingUp,
+      color: 'bg-green-100 text-green-600'
+    },
+    {
+      title: 'Em Negociação',
+      value: '6',
+      change: { value: 2, type: 'up' as const },
+      icon: TrendingUp,
+      color: 'bg-orange-100 text-orange-600'
+    },
+    {
+      title: 'Aguardando Retorno',
+      value: '12',
+      change: { value: -3, type: 'down' as const },
+      icon: Clock,
+      color: 'bg-yellow-100 text-yellow-600'
+    },
+    {
+      title: 'Aguardando Cliente',
+      value: '9',
+      change: { value: 8, type: 'up' as const },
+      icon: Clock,
+      color: 'bg-purple-100 text-purple-600'
+    },
+    {
+      title: 'Tempo Médio de Resposta',
+      value: '2.5min',
+      change: { value: -15, type: 'down' as const },
+      icon: TrendingUp,
+      color: 'bg-indigo-100 text-indigo-600'
+    }
+  ];
+
+  const columns = [
+    {
+      key: 'nome',
+      label: 'Nome',
+      render: (value: string, row: any) => (
+        <div className="flex items-center space-x-3">
+          <CustomerAvatar name={value} size="sm" online={row.online} />
+          <div>
+            <div className="font-medium">{value}</div>
+            <div className="text-sm text-muted-foreground">{row.telefone}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'canal',
+      label: 'Canal',
+      render: (value: string) => (
+        <Badge variant="outline">{value}</Badge>
+      ),
+    },
+    {
+      key: 'ultimaMensagem',
+      label: 'Última Mensagem',
+      render: (value: string) => (
+        <div className="max-w-xs truncate">{value}</div>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value: string) => {
+        const statusColors = {
+          novo: 'bg-blue-100 text-blue-600',
+          em_atendimento: 'bg-green-100 text-green-600',
+          aguardando_retorno: 'bg-yellow-100 text-yellow-600',
+          finalizado: 'bg-gray-100 text-gray-600'
+        };
+        return (
+          <Badge className={statusColors[value as keyof typeof statusColors] || 'bg-gray-100 text-gray-600'}>
+            {value.replace('_', ' ')}
+          </Badge>
+        );
+      },
+    },
+    {
+      key: 'naoLidas',
+      label: 'Não Lidas',
+      render: (value: number) => value > 0 ? (
+        <Badge className="bg-red-100 text-red-600">{value}</Badge>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      ),
+    },
+    {
+      key: 'hora',
+      label: 'Última Atividade',
+    },
+  ];
+
+  const handleView = (conversa: any) => {
+    setSelectedConversa(conversa);
+    setDetailsOpen(true);
+  };
+
+  const handleEdit = (conversa: any) => {
+    console.log('Editando conversa:', conversa);
+  };
+
+  const handleDelete = (conversa: any) => {
+    console.log('Excluindo conversa:', conversa);
+  };
 
   const mensagensExpandidas = [
     {
@@ -102,7 +247,7 @@ export default function Atendimento() {
     }
   ];
 
-  const conversaSelecionada = conversasExpandidas.find(c => c.id === selectedConversaId);
+  const conversaSelecionada = conversasAtendimento.find(c => c.id === selectedConversaId);
   const mensagensConversa = mensagensExpandidas.filter(m => m.conversaId === selectedConversaId);
 
   const handleSendMessage = () => {
@@ -118,8 +263,91 @@ export default function Atendimento() {
     "Gostaria de agendar uma reunião para apresentar nossos produtos?"
   ];
 
+  if (view === 'list') {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Atendimento</h1>
+            <p className="text-muted-foreground">
+              {filteredConversas.length} conversas encontradas
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <ViewToggle view={view} onViewChange={setView} />
+            <Button variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Exportar Relatório
+            </Button>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Conversa
+            </Button>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <QuickStatsGrid stats={atendimentoStats} columns={6} />
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome ou telefone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-48">
+              <Filter className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Filtrar por status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="novo">Novo</SelectItem>
+              <SelectItem value="em_atendimento">Em Atendimento</SelectItem>
+              <SelectItem value="aguardando_retorno">Aguardando Retorno</SelectItem>
+              <SelectItem value="finalizado">Finalizado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* DataTable */}
+        <DataTable
+          data={filteredConversas}
+          columns={columns}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+
+        <AtendimentoDetailsModal
+          conversa={selectedConversa}
+          open={detailsOpen}
+          onOpenChange={setDetailsOpen}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="h-[calc(100vh-2rem)] flex">
+      {/* Header para view kanban */}
+      <div className="absolute top-4 left-4 right-4 z-10 bg-background/95 backdrop-blur-sm border rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Atendimento</h1>
+          </div>
+          <ViewToggle view={view} onViewChange={setView} />
+        </div>
+      </div>
+      
+      {/* Margin top para compensar o header fixo */}
+      <div className="mt-20 w-full flex">
       {/* Painel 1 - Fila de Atendimento (25%) */}
       <div className="w-1/4 border-r border-border flex flex-col">
         <div className="p-4 border-b border-border">
@@ -132,7 +360,7 @@ export default function Atendimento() {
 
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-2">
-            {conversasExpandidas.map((conversa) => (
+            {conversasAtendimento.map((conversa) => (
               <Card 
                 key={conversa.id}
                 className={`cursor-pointer transition-colors hover:bg-accent ${
@@ -144,20 +372,20 @@ export default function Atendimento() {
                   <div className="flex items-start space-x-3">
                     <div className="relative">
                       <CustomerAvatar 
-                        name={conversa.cliente} 
+                        name={conversa.nome} 
                         size="sm"
-                        online={conversa.status === 'online'}
+                        online={conversa.online}
                       />
-                      {conversa.mensagens_nao_lidas > 0 && (
+                      {conversa.naoLidas > 0 && (
                         <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-primary">
-                          {conversa.mensagens_nao_lidas}
+                          {conversa.naoLidas}
                         </Badge>
                       )}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-sm truncate">{conversa.cliente}</h3>
+                        <h3 className="font-medium text-sm truncate">{conversa.nome}</h3>
                         <span className="text-xs text-muted-foreground">{conversa.hora}</span>
                       </div>
                       
@@ -173,7 +401,7 @@ export default function Atendimento() {
                       </div>
                       
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {conversa.ultima_mensagem}
+                        {conversa.ultimaMensagem}
                       </p>
                       
                       {conversa.tags.length > 0 && (
@@ -203,11 +431,11 @@ export default function Atendimento() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <CustomerAvatar 
-                    name={conversaSelecionada.cliente} 
-                    online={conversaSelecionada.status === 'online'}
+                    name={conversaSelecionada.nome} 
+                    online={conversaSelecionada.online}
                   />
                   <div>
-                    <h3 className="font-semibold">{conversaSelecionada.cliente}</h3>
+                    <h3 className="font-semibold">{conversaSelecionada.nome}</h3>
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <span>Origem: {conversaSelecionada.origem_lead}</span>
                       <span>•</span>
@@ -355,6 +583,7 @@ export default function Atendimento() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
