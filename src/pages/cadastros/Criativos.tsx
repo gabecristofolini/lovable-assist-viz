@@ -198,10 +198,17 @@ export default function Criativos() {
             {filteredCreativos.length} criativos encontrados
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Criativo
-        </Button>
+        <div className="flex items-center space-x-2">
+          <ViewToggle view={view} onViewChange={setView} />
+          <Button variant="outline">
+            <Search className="mr-2 h-4 w-4" />
+            Importar CSV
+          </Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Criativo
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats */}
@@ -254,46 +261,43 @@ export default function Criativos() {
         </Button>
       </div>
 
-      {/* Filtros e Toggle de Visualização */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-1 gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={tipoFilter} onValueChange={setTipoFilter}>
-            <SelectTrigger className="w-48">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os tipos</SelectItem>
-              <SelectItem value="imagem">Imagem</SelectItem>
-              <SelectItem value="video">Vídeo</SelectItem>
-              <SelectItem value="carrossel">Carrossel</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={campanhaFilter} onValueChange={setCampanhaFilter}>
-            <SelectTrigger className="w-48">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Campanha" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas campanhas</SelectItem>
-              {campanhas.map(campanha => (
-                <SelectItem key={campanha.id} value={campanha.id.toString()}>
-                  {campanha.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
-        <ViewToggle view={view} onViewChange={setView} />
+        <Select value={tipoFilter} onValueChange={setTipoFilter}>
+          <SelectTrigger className="w-48">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os tipos</SelectItem>
+            <SelectItem value="imagem">Imagem</SelectItem>
+            <SelectItem value="video">Vídeo</SelectItem>
+            <SelectItem value="carrossel">Carrossel</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={campanhaFilter} onValueChange={setCampanhaFilter}>
+          <SelectTrigger className="w-48">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Campanha" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas campanhas</SelectItem>
+            {campanhas.map(campanha => (
+              <SelectItem key={campanha.id} value={campanha.id.toString()}>
+                {campanha.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Visualização Lista/Kanban */}
@@ -301,7 +305,6 @@ export default function Criativos() {
         <DataTable
           data={filteredCreativos}
           columns={columns}
-          title={`Criativos (${filteredCreativos.length} de ${criativos.length})`}
           onView={(criativo) => console.log('Visualizar criativo:', criativo)}
           onEdit={(criativo) => console.log('Editar criativo:', criativo)}
           onDelete={(criativo) => console.log('Excluir criativo:', criativo)}

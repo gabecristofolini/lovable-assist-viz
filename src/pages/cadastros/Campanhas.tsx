@@ -175,10 +175,17 @@ export default function Campanhas() {
             {filteredCampanhas.length} campanhas encontradas
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Campanha
-        </Button>
+        <div className="flex items-center space-x-2">
+          <ViewToggle view={view} onViewChange={setView} />
+          <Button variant="outline">
+            <Search className="mr-2 h-4 w-4" />
+            Importar CSV
+          </Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Campanha
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats */}
@@ -231,43 +238,41 @@ export default function Campanhas() {
         </Button>
       </div>
 
-      {/* Filtros e Toggle de Visualização */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-1 gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome ou canal..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-48">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="ativa">Ativa</SelectItem>
-              <SelectItem value="pausada">Pausada</SelectItem>
-              <SelectItem value="finalizada">Finalizada</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={canalFilter} onValueChange={setCanalFilter}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Canal" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os canais</SelectItem>
-              <SelectItem value="Meta">Meta</SelectItem>
-              <SelectItem value="Google">Google</SelectItem>
-              <SelectItem value="TikTok">TikTok</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome ou canal..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
-        <ViewToggle view={view} onViewChange={setView} />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-48">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os status</SelectItem>
+            <SelectItem value="ativa">Ativa</SelectItem>
+            <SelectItem value="pausada">Pausada</SelectItem>
+            <SelectItem value="finalizada">Finalizada</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={canalFilter} onValueChange={setCanalFilter}>
+          <SelectTrigger className="w-48">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Canal" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os canais</SelectItem>
+            <SelectItem value="Meta">Meta</SelectItem>
+            <SelectItem value="Google">Google</SelectItem>
+            <SelectItem value="TikTok">TikTok</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Visualização Lista/Kanban */}
@@ -275,7 +280,6 @@ export default function Campanhas() {
         <DataTable
           data={filteredCampanhas}
           columns={columns}
-          title={`Campanhas (${filteredCampanhas.length} de ${campanhas.length})`}
           onView={(campanha) => console.log('Visualizar campanha:', campanha)}
           onEdit={(campanha) => console.log('Editar campanha:', campanha)}
           onDelete={(campanha) => console.log('Excluir campanha:', campanha)}

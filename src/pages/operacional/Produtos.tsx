@@ -276,19 +276,26 @@ export default function Produtos() {
   const alertasBaixos = mockProdutos.filter(p => p.statusEstoque === 'baixo');
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cadastro de Produtos</h1>
+          <h1 className="text-3xl font-bold text-foreground">Produtos</h1>
           <p className="text-muted-foreground">
-            Gerencie o catálogo de produtos e controle de estoque
+            {filteredProdutos.length} produtos encontrados
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Produto
-        </Button>
+        <div className="flex items-center space-x-2">
+          <ViewToggle view={view} onViewChange={setView} />
+          <Button variant="outline">
+            <Search className="mr-2 h-4 w-4" />
+            Importar CSV
+          </Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Produto
+          </Button>
+        </div>
       </div>
 
       {/* Alertas Inteligentes */}
@@ -314,7 +321,7 @@ export default function Produtos() {
       )}
 
       {/* Quick Stats */}
-      <QuickStatsGrid stats={quickStats} />
+      <QuickStatsGrid stats={quickStats} columns={4} />
 
       {/* Filtros Rápidos */}
       <div className="flex flex-wrap gap-2">
@@ -363,43 +370,42 @@ export default function Produtos() {
         </Button>
       </div>
 
-      {/* Filtros e Toggle de Visualização */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-1 gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Buscar por nome ou código..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todas Categorias</SelectItem>
-              <SelectItem value="Acessórios">Acessórios</SelectItem>
-              <SelectItem value="Chapas">Chapas</SelectItem>
-              <SelectItem value="Bordas">Bordas</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Status Estoque" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos Status</SelectItem>
-              <SelectItem value="critico">Crítico</SelectItem>
-              <SelectItem value="baixo">Baixo</SelectItem>
-              <SelectItem value="adequado">Adequado</SelectItem>
-              <SelectItem value="alto">Alto</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Buscar por nome ou código..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
-        <ViewToggle view={view} onViewChange={setView} />
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-[180px]">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todas Categorias</SelectItem>
+            <SelectItem value="Acessórios">Acessórios</SelectItem>
+            <SelectItem value="Chapas">Chapas</SelectItem>
+            <SelectItem value="Bordas">Bordas</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <SelectTrigger className="w-[180px]">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Status Estoque" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos Status</SelectItem>
+            <SelectItem value="critico">Crítico</SelectItem>
+            <SelectItem value="baixo">Baixo</SelectItem>
+            <SelectItem value="adequado">Adequado</SelectItem>
+            <SelectItem value="alto">Alto</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Visualização Lista/Kanban */}
@@ -407,7 +413,6 @@ export default function Produtos() {
         <DataTable
           data={filteredProdutos}
           columns={columns}
-          title={`Produtos (${filteredProdutos.length} de ${mockProdutos.length})`}
           onView={(produto) => console.log('Visualizar produto:', produto)}
           onEdit={(produto) => console.log('Editar produto:', produto)}
           onDelete={(produto) => console.log('Excluir produto:', produto)}
