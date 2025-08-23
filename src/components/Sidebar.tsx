@@ -29,7 +29,8 @@ const navigation = [
       { name: 'Leads', href: '/operacional/leads', icon: Users },
       { name: 'Atendimento', href: '/operacional/atendimento', icon: MessageSquare },
       { name: 'Orçamentos', href: '/operacional/orcamentos', icon: Users },
-      { name: 'Pedidos', href: '/operacional/pedidos', icon: ShoppingCart }
+      { name: 'Pedidos', href: '/operacional/pedidos', icon: ShoppingCart },
+      { name: 'Produtos', href: '/operacional/produtos', icon: Package }
     ]
   },
   {
@@ -39,7 +40,7 @@ const navigation = [
       { name: 'Criativos', href: '/cadastros/criativos', icon: Users },
       { name: 'Clientes', href: '/cadastros/clientes', icon: Building2 },
       { name: 'Chatbots', href: '/cadastros/chatbots', icon: MessageSquare },
-      { name: 'Produtos', href: '/cadastros/produtos', icon: Package }
+      { name: 'Equipes', href: '/cadastros/equipes', icon: Users }
     ]
   }
 ];

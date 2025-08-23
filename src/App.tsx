@@ -30,7 +30,8 @@ import Campanhas from "./pages/cadastros/Campanhas";
 import Criativos from "./pages/cadastros/Criativos";
 import Clientes from "./pages/cadastros/Clientes";
 import Chatbots from "./pages/cadastros/Chatbots";
-import Produtos from "./pages/cadastros/Produtos";
+import Equipes from "./pages/cadastros/Equipes";
+import Produtos from "./pages/operacional/Produtos";
 
 const queryClient = new QueryClient();
 
@@ -51,13 +52,14 @@ const App = () => (
             <Route path="/cadastros/criativos" element={<Criativos />} />
             <Route path="/cadastros/clientes" element={<Clientes />} />
             <Route path="/cadastros/chatbots" element={<Chatbots />} />
-            <Route path="/cadastros/produtos" element={<Produtos />} />
+            <Route path="/cadastros/equipes" element={<Equipes />} />
             
             {/* Operacional */}
             <Route path="/operacional/leads" element={<LeadsKanban />} />
             <Route path="/operacional/atendimento" element={<AtendimentoOperacional />} />
             <Route path="/operacional/orcamentos" element={<Orcamentos />} />
             <Route path="/operacional/pedidos" element={<Pedidos />} />
+            <Route path="/operacional/produtos" element={<Produtos />} />
             
             {/* Dashboards */}
             <Route path="/dashboards/financeiro" element={<DashboardFinanceiro />} />

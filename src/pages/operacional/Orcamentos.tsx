@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Search, Filter, Plus, Eye, Edit, Send, Clock, CheckCircle, XCircle, Calendar, DollarSign } from 'lucide-react';
+import { Search, Filter, Plus, Upload, Eye, Edit, Send, Clock, CheckCircle, XCircle, Calendar, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ViewToggle } from '@/components/ViewToggle';
+import { DataTable } from '@/components/DataTable';
+import { PipelineStage } from '@/components/PipelineStage';
 import {
   Select,
   SelectContent,
@@ -85,6 +88,7 @@ const mockOrcamentos = [
 export default function Orcamentos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [view, setView] = useState<'list' | 'kanban'>('list');
 
   const filteredOrcamentos = mockOrcamentos.filter(orcamento => {
     const matchesSearch = orcamento.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -139,6 +143,76 @@ export default function Orcamentos() {
     return diffDias <= 3 && diffDias >= 0;
   };
 
+  const handleView = (orcamento: any) => {
+    console.log('Visualizando orçamento:', orcamento);
+  };
+
+  const handleEdit = (orcamento: any) => {
+    console.log('Editando orçamento:', orcamento);
+  };
+
+  const handleDelete = (orcamento: any) => {
+    console.log('Excluindo orçamento:', orcamento);
+  };
+
+  const columns = [
+    {
+      key: 'numero',
+      label: 'Número',
+      sortable: true,
+    },
+    {
+      key: 'cliente',
+      label: 'Cliente',
+      sortable: true,
+      render: (value: string, row: any) => (
+        <div>
+          <div className="font-medium">{value}</div>
+          <div className="text-sm text-muted-foreground">{row.contato}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'valor',
+      label: 'Valor',
+      sortable: true,
+      render: (value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (value: string) => (
+        <Badge 
+          variant="outline"
+          className={`${getStatusColor(value)} border-none`}
+        >
+          {getStatusIcon(value)} {getStatusLabel(value)}
+        </Badge>
+      ),
+    },
+    {
+      key: 'dataEnvio',
+      label: 'Data Envio',
+      sortable: true,
+      render: (value: string | null) => value || 'Não enviado',
+    },
+    {
+      key: 'validade',
+      label: 'Validade',
+      sortable: true,
+      render: (value: string) => (
+        <div className={isVencimentoProximo(value) ? 'text-red-600 font-medium' : ''}>
+          {value}
+        </div>
+      ),
+    },
+    {
+      key: 'itens',
+      label: 'Itens',
+      sortable: true,
+    },
+  ];
+
   // Cálculo das métricas
   const metricas = {
     total: mockOrcamentos.length,
@@ -161,10 +235,17 @@ export default function Orcamentos() {
             {filteredOrcamentos.length} orçamentos encontrados
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Orçamento
-        </Button>
+        <div className="flex items-center space-x-2">
+          <ViewToggle view={view} onViewChange={setView} />
+          <Button variant="outline">
+            <Upload className="mr-2 h-4 w-4" />
+            Exportar
+          </Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Orçamento
+          </Button>
+        </div>
       </div>
 
       {/* Métricas */}
@@ -270,95 +351,142 @@ export default function Orcamentos() {
         </Select>
       </div>
 
-      {/* Lista de Orçamentos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredOrcamentos.map((orcamento) => (
-          <Card key={orcamento.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {getStatusIcon(orcamento.status)}
-                  <div>
-                    <CardTitle className="text-lg">{orcamento.numero}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{orcamento.cliente}</p>
-                  </div>
-                </div>
-                <Badge className={getStatusColor(orcamento.status)}>
-                  {getStatusLabel(orcamento.status)}
-                </Badge>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              {/* Informações Principais */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Contato</p>
-                  <p className="font-medium">{orcamento.contato}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Valor</p>
-                  <p className="font-bold text-lg text-green-600">R$ {orcamento.valor.toLocaleString()}</p>
-                </div>
-              </div>
+      {/* Organizar orçamentos por estágio para o kanban */}
+      {(() => {
+        const stages = {
+          elaboracao: filteredOrcamentos.filter(o => o.status === 'elaboracao'),
+          enviado: filteredOrcamentos.filter(o => o.status === 'enviado'),
+          negociacao: filteredOrcamentos.filter(o => o.status === 'negociacao'),
+          aprovado: filteredOrcamentos.filter(o => o.status === 'aprovado'),
+          perdido: filteredOrcamentos.filter(o => o.status === 'perdido'),
+        };
 
-              {/* Datas */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Enviado em</p>
-                  <p className="text-sm">{orcamento.dataEnvio || 'Não enviado'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Válido até</p>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-sm">{orcamento.validade}</p>
-                    {isVencimentoProximo(orcamento.validade) && (
-                      <Badge variant="destructive" className="text-xs">Vence em breve</Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
+        const stageConfig = [
+          {
+            id: 'elaboracao',
+            title: 'Elaboração',
+            items: stages.elaboracao.map(orcamento => ({
+              id: orcamento.id,
+              title: `${orcamento.numero}`,
+              subtitle: `${orcamento.cliente} - ${orcamento.contato}`,
+              value: `R$ ${orcamento.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              temperature: 'morno',
+              daysInStage: 1,
+              nextAction: 'Finalizar',
+              avatar: '',
+              tags: ['Elaboração'],
+              priority: 'normal' as const
+            })),
+            color: 'bg-gray-100',
+            count: stages.elaboracao.length
+          },
+          {
+            id: 'enviado',
+            title: 'Enviado',
+            items: stages.enviado.map(orcamento => ({
+              id: orcamento.id,
+              title: `${orcamento.numero}`,
+              subtitle: `${orcamento.cliente} - ${orcamento.contato}`,
+              value: `R$ ${orcamento.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              temperature: 'quente',
+              daysInStage: 2,
+              nextAction: 'Aguardar resposta',
+              avatar: '',
+              tags: ['Enviado'],
+              priority: isVencimentoProximo(orcamento.validade) ? 'alta' as const : 'normal' as const
+            })),
+            color: 'bg-blue-100',
+            count: stages.enviado.length
+          },
+          {
+            id: 'negociacao',
+            title: 'Negociação',
+            items: stages.negociacao.map(orcamento => ({
+              id: orcamento.id,
+              title: `${orcamento.numero}`,
+              subtitle: `${orcamento.cliente} - ${orcamento.contato}`,
+              value: `R$ ${orcamento.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              temperature: 'quente',
+              daysInStage: 3,
+              nextAction: 'Negociar',
+              avatar: '',
+              tags: ['Negociação'],
+              priority: 'urgente' as const
+            })),
+            color: 'bg-yellow-100',
+            count: stages.negociacao.length
+          },
+          {
+            id: 'aprovado',
+            title: 'Aprovado',
+            items: stages.aprovado.map(orcamento => ({
+              id: orcamento.id,
+              title: `${orcamento.numero}`,
+              subtitle: `${orcamento.cliente} - ${orcamento.contato}`,
+              value: `R$ ${orcamento.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              temperature: 'quente',
+              daysInStage: 1,
+              nextAction: 'Gerar pedido',
+              avatar: '',
+              tags: ['Aprovado'],
+              priority: 'urgente' as const
+            })),
+            color: 'bg-green-100',
+            count: stages.aprovado.length
+          },
+          {
+            id: 'perdido',
+            title: 'Perdido',
+            items: stages.perdido.map(orcamento => ({
+              id: orcamento.id,
+              title: `${orcamento.numero}`,
+              subtitle: `${orcamento.cliente} - ${orcamento.contato}`,
+              value: `R$ ${orcamento.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              temperature: 'frio',
+              daysInStage: 5,
+              nextAction: 'Revisar',
+              avatar: '',
+              tags: ['Perdido'],
+              priority: 'baixa' as const
+            })),
+            color: 'bg-red-100',
+            count: stages.perdido.length
+          }
+        ];
 
-              {/* Detalhes */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Itens</p>
-                  <p className="text-sm">{orcamento.itens} produtos</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Desconto</p>
-                  <p className="text-sm">{orcamento.desconto}%</p>
-                </div>
+        return (
+          <>
+            {/* Content - Lista ou Kanban */}
+            {view === 'list' ? (
+              <DataTable
+                data={filteredOrcamentos}
+                columns={columns}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onRowClick={handleView}
+              />
+            ) : (
+              <div className="flex gap-6 overflow-x-auto pb-4">
+                {stageConfig.map((stage) => (
+                  <PipelineStage
+                    key={stage.id}
+                    title={stage.title}
+                    count={stage.count}
+                    items={stage.items}
+                    color={stage.color}
+                    onAddItem={() => console.log(`Adicionar orçamento em ${stage.title}`)}
+                    onItemClick={(item) => {
+                      const orcamento = filteredOrcamentos.find(o => o.id === item.id);
+                      if (orcamento) handleView(orcamento);
+                    }}
+                  />
+                ))}
               </div>
-
-              {/* Observações */}
-              {orcamento.observacoes && (
-                <div className="bg-muted p-3 rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Observações:</p>
-                  <p className="text-sm">{orcamento.observacoes}</p>
-                </div>
-              )}
-
-              {/* Ações */}
-              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Eye className="mr-2 h-4 w-4" />
-                  Visualizar
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar
-                </Button>
-                {orcamento.status === 'aprovado' && (
-                  <Button size="sm" className="flex-1">
-                    Converter em Pedido
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* Empty State */}
       {filteredOrcamentos.length === 0 && (
