@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
 import { DataTable } from '@/components/DataTable';
+import { ViewToggle } from '@/components/ViewToggle';
+import { QuickStatsGrid } from '@/components/QuickStatsGrid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { StatsCard } from '@/components/StatsCard';
 import { MetricCard } from '@/components/MetricCard';
 import { 
   Package,
@@ -15,7 +16,11 @@ import {
   DollarSign,
   Archive,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  ShoppingCart,
+  Target,
+  BarChart3
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -129,6 +134,8 @@ export default function Produtos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [selectedStatus, setSelectedStatus] = useState('todos');
+  const [view, setView] = useState<'list' | 'kanban'>('list');
+  const [quickFilter, setQuickFilter] = useState<string>('todos');
 
   // Filtros e estatísticas
   const filteredProdutos = useMemo(() => {
@@ -138,24 +145,68 @@ export default function Produtos() {
       const matchesCategory = selectedCategory === 'todos' || produto.categoria === selectedCategory;
       const matchesStatus = selectedStatus === 'todos' || produto.statusEstoque === selectedStatus;
       
-      return matchesSearch && matchesCategory && matchesStatus;
+      // Filtros rápidos
+      let matchesQuickFilter = true;
+      if (quickFilter === 'criticos') {
+        matchesQuickFilter = produto.statusEstoque === 'critico';
+      } else if (quickFilter === 'baixos') {
+        matchesQuickFilter = produto.statusEstoque === 'baixo';
+      } else if (quickFilter === 'alto_valor') {
+        matchesQuickFilter = produto.total > 1000;
+      } else if (quickFilter === 'sem_movimento') {
+        matchesQuickFilter = new Date(produto.dataUltimaVenda) < new Date('2024-01-15');
+      }
+      
+      return matchesSearch && matchesCategory && matchesStatus && matchesQuickFilter;
     });
-  }, [searchTerm, selectedCategory, selectedStatus]);
+  }, [searchTerm, selectedCategory, selectedStatus, quickFilter]);
 
   const stats = useMemo(() => {
     const totalProdutos = mockProdutos.length;
     const valorTotalEstoque = mockProdutos.reduce((sum, p) => sum + p.total, 0);
     const produtosCriticos = mockProdutos.filter(p => p.statusEstoque === 'critico').length;
     const produtosBaixos = mockProdutos.filter(p => p.statusEstoque === 'baixo').length;
+    const semMovimento = mockProdutos.filter(p => new Date(p.dataUltimaVenda) < new Date('2024-01-15')).length;
+    const altoValor = mockProdutos.filter(p => p.total > 1000).length;
     
     return {
       totalProdutos,
       valorTotalEstoque,
       produtosCriticos,
       produtosBaixos,
+      semMovimento,
+      altoValor,
       alertas: produtosCriticos + produtosBaixos
     };
   }, []);
+
+  // Quick stats para o componente QuickStatsGrid
+  const quickStats = [
+    {
+      title: "Total de Produtos",
+      value: stats.totalProdutos,
+      icon: Package,
+      description: "Cadastrados"
+    },
+    {
+      title: "Estoque Crítico",
+      value: stats.produtosCriticos,
+      icon: AlertTriangle,
+      description: "Produtos em falta"
+    },
+    {
+      title: "Alto Valor",
+      value: stats.altoValor,
+      icon: TrendingUp,
+      description: "Acima de R$ 1.000"
+    },
+    {
+      title: "Sem Movimento",
+      value: stats.semMovimento,
+      icon: Clock,
+      description: "Últimos 7 dias"
+    }
+  ];
 
   const columns = [
     { 
@@ -262,90 +313,143 @@ export default function Produtos() {
         </div>
       )}
 
-      {/* Dashboards - Cards de Métricas */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total de Produtos"
-          value={stats.totalProdutos}
-          icon={Package}
-          description="Produtos cadastrados"
-        />
-        <MetricCard
-          title="Valor do Estoque"
-          value={`R$ ${stats.valorTotalEstoque.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-          icon={DollarSign}
-          trend={{ value: 8.2, type: 'up' }}
-          description="Valor total em estoque"
-        />
-        <MetricCard
-          title="Produtos Críticos"
-          value={stats.produtosCriticos}
-          icon={AlertTriangle}
-          description="Estoque crítico"
-        />
-        <MetricCard
-          title="Necessitam Reposição"
-          value={stats.alertas}
-          icon={RefreshCw}
-          description="Produtos para comprar"
-        />
+      {/* Quick Stats */}
+      <QuickStatsGrid stats={quickStats} />
+
+      {/* Filtros Rápidos */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={quickFilter === 'todos' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('todos')}
+        >
+          Todos ({mockProdutos.length})
+        </Button>
+        <Button
+          variant={quickFilter === 'criticos' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('criticos')}
+          className="gap-2"
+        >
+          <AlertTriangle className="h-4 w-4" />
+          Críticos ({stats.produtosCriticos})
+        </Button>
+        <Button
+          variant={quickFilter === 'baixos' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('baixos')}
+          className="gap-2"
+        >
+          <Archive className="h-4 w-4" />
+          Baixos ({stats.produtosBaixos})
+        </Button>
+        <Button
+          variant={quickFilter === 'alto_valor' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('alto_valor')}
+          className="gap-2"
+        >
+          <TrendingUp className="h-4 w-4" />
+          Alto Valor ({stats.altoValor})
+        </Button>
+        <Button
+          variant={quickFilter === 'sem_movimento' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setQuickFilter('sem_movimento')}
+          className="gap-2"
+        >
+          <Clock className="h-4 w-4" />
+          Sem Movimento ({stats.semMovimento})
+        </Button>
       </div>
 
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filtros e Busca
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar por nome ou código..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todas Categorias</SelectItem>
-                <SelectItem value="Acessórios">Acessórios</SelectItem>
-                <SelectItem value="Chapas">Chapas</SelectItem>
-                <SelectItem value="Bordas">Bordas</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Status Estoque" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos Status</SelectItem>
-                <SelectItem value="critico">Crítico</SelectItem>
-                <SelectItem value="baixo">Baixo</SelectItem>
-                <SelectItem value="adequado">Adequado</SelectItem>
-                <SelectItem value="alto">Alto</SelectItem>
-              </SelectContent>
-            </Select>
+      {/* Filtros e Toggle de Visualização */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="flex flex-1 gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Buscar por nome ou código..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        </CardContent>
-      </Card>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todas Categorias</SelectItem>
+              <SelectItem value="Acessórios">Acessórios</SelectItem>
+              <SelectItem value="Chapas">Chapas</SelectItem>
+              <SelectItem value="Bordas">Bordas</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Status Estoque" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos Status</SelectItem>
+              <SelectItem value="critico">Crítico</SelectItem>
+              <SelectItem value="baixo">Baixo</SelectItem>
+              <SelectItem value="adequado">Adequado</SelectItem>
+              <SelectItem value="alto">Alto</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <ViewToggle view={view} onViewChange={setView} />
+      </div>
 
-      {/* Tabela de Produtos */}
-      <DataTable
-        data={filteredProdutos}
-        columns={columns}
-        title={`Produtos (${filteredProdutos.length} de ${mockProdutos.length})`}
-        onView={(produto) => console.log('Visualizar produto:', produto)}
-        onEdit={(produto) => console.log('Editar produto:', produto)}
-        onDelete={(produto) => console.log('Excluir produto:', produto)}
-      />
+      {/* Visualização Lista/Kanban */}
+      {view === 'list' ? (
+        <DataTable
+          data={filteredProdutos}
+          columns={columns}
+          title={`Produtos (${filteredProdutos.length} de ${mockProdutos.length})`}
+          onView={(produto) => console.log('Visualizar produto:', produto)}
+          onEdit={(produto) => console.log('Editar produto:', produto)}
+          onDelete={(produto) => console.log('Excluir produto:', produto)}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredProdutos.map((produto) => (
+            <Card key={produto.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold text-sm mb-1">{produto.nome}</h3>
+                    <p className="text-muted-foreground text-xs">Código: {produto.codigo}</p>
+                    <Badge variant="secondary" className="mt-1">{produto.categoria}</Badge>
+                  </div>
+                  {getStatusEstoqueBadge(produto.statusEstoque, produto.estoque)}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Estoque:</span>
+                    <span className="font-medium">{produto.estoque} {produto.unidade}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Valor Unit.:</span>
+                    <span className="font-medium text-green-600">R$ {produto.valor.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Total:</span>
+                    <span className="font-bold text-green-700">R$ {produto.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Fornecedor:</span>
+                    <span className="text-sm">{produto.fornecedor}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Dashboard Adicional - Análises Rápidas */}
       <div className="grid gap-4 md:grid-cols-2">
