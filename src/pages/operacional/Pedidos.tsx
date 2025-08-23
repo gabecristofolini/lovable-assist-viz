@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Upload, Plus, Package, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, Truck, FileText } from 'lucide-react';
+import { Search, Filter, Upload, Plus, Package, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, Truck, FileText, Calendar, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/DataTable';
@@ -16,10 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 export default function Pedidos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [valueFilter, setValueFilter] = useState('all');
+  const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const navigate = useNavigate();
 
@@ -29,13 +33,66 @@ export default function Pedidos() {
     const matchesSearch = pedido.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pedido.cliente.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || pedido.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // Date filter
+    const matchesDate = dateFilter === 'all' || (() => {
+      const today = new Date();
+      const pedidoDate = new Date(pedido.data.split('/').reverse().join('-'));
+      switch (dateFilter) {
+        case 'today':
+          return pedidoDate.toDateString() === today.toDateString();
+        case 'week':
+          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return pedidoDate >= weekAgo;
+        case 'month':
+          const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+          return pedidoDate >= monthAgo;
+        default:
+          return true;
+      }
+    })();
+    
+    // Value filter
+    const matchesValue = valueFilter === 'all' || (() => {
+      switch (valueFilter) {
+        case 'low':
+          return pedido.valor < 1000;
+        case 'medium':
+          return pedido.valor >= 1000 && pedido.valor < 5000;
+        case 'high':
+          return pedido.valor >= 5000;
+        default:
+          return true;
+      }
+    })();
+    
+    // Quick filters
+    const matchesQuickFilters = quickFilters.length === 0 || quickFilters.every(filter => {
+      switch (filter) {
+        case 'urgent':
+          return ['processando', 'enviado'].includes(pedido.status);
+        case 'high-value':
+          return pedido.valor >= 5000;
+        case 'recent':
+          const today = new Date();
+          const pedidoDate = new Date(pedido.data.split('/').reverse().join('-'));
+          const daysDiff = (today.getTime() - pedidoDate.getTime()) / (1000 * 3600 * 24);
+          return daysDiff <= 7;
+        case 'many-items':
+          return pedido.itens >= 10;
+        default:
+          return true;
+      }
+    });
+    
+    return matchesSearch && matchesStatus && matchesDate && matchesValue && matchesQuickFilters;
   });
 
   const columns = [
     {
       key: 'numero',
       label: 'Número',
+      sortable: true,
       render: (value: string, row: any) => (
         <div>
           <div className="font-medium">{value}</div>
@@ -46,14 +103,17 @@ export default function Pedidos() {
     {
       key: 'cliente',
       label: 'Cliente',
+      sortable: true,
     },
     {
       key: 'data',
       label: 'Data',
+      sortable: true,
     },
     {
       key: 'status',
       label: 'Status',
+      sortable: true,
       render: (value: string) => (
         <Badge className={getStatusColor(value)}>
           {getStatusLabel(value)}
@@ -63,13 +123,40 @@ export default function Pedidos() {
     {
       key: 'valor',
       label: 'Valor',
+      sortable: true,
       render: (value: number) => `R$ ${value.toLocaleString()}`,
     },
     {
       key: 'itens',
       label: 'Itens',
+      sortable: true,
       render: (value: number) => `${value} ${value === 1 ? 'item' : 'itens'}`,
     },
+  ];
+
+  const toggleQuickFilter = (filter: string) => {
+    setQuickFilters(prev => 
+      prev.includes(filter) 
+        ? prev.filter(f => f !== filter)
+        : [...prev, filter]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setDateFilter('all');
+    setValueFilter('all');
+    setQuickFilters([]);
+  };
+
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || dateFilter !== 'all' || valueFilter !== 'all' || quickFilters.length > 0;
+
+  const quickFilterOptions = [
+    { key: 'urgent', label: 'Urgentes', icon: AlertTriangle, color: 'bg-red-100 text-red-700 hover:bg-red-200' },
+    { key: 'high-value', label: 'Alto Valor', icon: DollarSign, color: 'bg-green-100 text-green-700 hover:bg-green-200' },
+    { key: 'recent', label: 'Recentes', icon: Clock, color: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
+    { key: 'many-items', label: 'Muitos Itens', icon: Package, color: 'bg-purple-100 text-purple-700 hover:bg-purple-200' },
   ];
 
   const handleView = (pedido: any) => {
@@ -272,7 +359,42 @@ export default function Pedidos() {
       {/* Quick Stats */}
       <QuickStatsGrid stats={pedidoStats} columns={8} />
 
-      {/* Filters */}
+      {/* Quick Filters */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-sm font-medium text-muted-foreground">Filtros rápidos:</span>
+        {quickFilterOptions.map((option) => {
+          const Icon = option.icon;
+          const isActive = quickFilters.includes(option.key);
+          return (
+            <Button
+              key={option.key}
+              variant="outline"
+              size="sm"
+              onClick={() => toggleQuickFilter(option.key)}
+              className={cn(
+                "transition-colors",
+                isActive ? option.color : "hover:bg-muted"
+              )}
+            >
+              <Icon className="mr-2 h-3 w-3" />
+              {option.label}
+            </Button>
+          );
+        })}
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearAllFilters}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <X className="mr-2 h-3 w-3" />
+            Limpar filtros
+          </Button>
+        )}
+      </div>
+
+      {/* Advanced Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -283,10 +405,11 @@ export default function Pedidos() {
             className="pl-10"
           />
         </div>
+        
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48">
             <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Filtrar por status" />
+            <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
@@ -295,6 +418,32 @@ export default function Pedidos() {
             <SelectItem value="processando">Processando</SelectItem>
             <SelectItem value="enviado">Enviado</SelectItem>
             <SelectItem value="concluido">Concluído</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={dateFilter} onValueChange={setDateFilter}>
+          <SelectTrigger className="w-40">
+            <Calendar className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Período" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="today">Hoje</SelectItem>
+            <SelectItem value="week">7 dias</SelectItem>
+            <SelectItem value="month">30 dias</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={valueFilter} onValueChange={setValueFilter}>
+          <SelectTrigger className="w-40">
+            <DollarSign className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Valor" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="low">Até R$ 1k</SelectItem>
+            <SelectItem value="medium">R$ 1k - 5k</SelectItem>
+            <SelectItem value="high">Acima R$ 5k</SelectItem>
           </SelectContent>
         </Select>
       </div>
