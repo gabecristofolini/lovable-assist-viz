@@ -9,7 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import LeadDetail from "./pages/LeadDetail";
 import Atendimento from "./pages/Atendimento";
-import Pedidos from "./pages/Pedidos";
+import PedidosOperacional from "./pages/operacional/Pedidos";
 import NovoPedido from "./pages/NovoPedido";
 import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
@@ -58,7 +58,7 @@ const App = () => (
             <Route path="/operacional/leads" element={<LeadsKanban />} />
             <Route path="/operacional/atendimento" element={<AtendimentoOperacional />} />
             <Route path="/operacional/orcamentos" element={<Orcamentos />} />
-            <Route path="/operacional/pedidos" element={<Pedidos />} />
+            <Route path="/operacional/pedidos" element={<PedidosOperacional />} />
             <Route path="/operacional/produtos" element={<Produtos />} />
             
             {/* Dashboards */}
@@ -70,7 +70,7 @@ const App = () => (
             <Route path="/leads" element={<Leads />} />
             <Route path="/leads/:id" element={<LeadDetail />} />
             <Route path="/atendimento" element={<Atendimento />} />
-            <Route path="/pedidos" element={<Pedidos />} />
+            <Route path="/pedidos" element={<PedidosOperacional />} />
             <Route path="/pedidos/novo" element={<NovoPedido />} />
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="*" element={<NotFound />} />
