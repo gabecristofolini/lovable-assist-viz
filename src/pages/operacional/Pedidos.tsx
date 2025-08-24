@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Upload, Plus, Package, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, Truck, FileText, Calendar, X } from 'lucide-react';
+import { DatePeriodFilter } from '@/components/DatePeriodFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/DataTable';
@@ -174,60 +175,60 @@ export default function Pedidos() {
   // Estatísticas rápidas dos pedidos
   const pedidoStats = [
     {
-      title: 'Rascunhos',
-      value: '8',
-      change: { value: 3, type: 'up' as const },
-      icon: FileText,
-      color: 'bg-gray-100 text-gray-600'
-    },
-    {
-      title: 'Confirmados',
-      value: '15',
-      change: { value: 5, type: 'up' as const },
-      icon: CheckCircle,
-      color: 'bg-blue-100 text-blue-600'
-    },
-    {
-      title: 'Processando',
-      value: '12',
-      change: { value: 2, type: 'up' as const },
-      icon: Clock,
-      color: 'bg-orange-100 text-orange-600'
-    },
-    {
-      title: 'Enviados',
-      value: '28',
-      change: { value: 8, type: 'up' as const },
-      icon: Truck,
-      color: 'bg-purple-100 text-purple-600'
-    },
-    {
-      title: 'Concluídos',
+      title: 'Vendas Realizadas',
       value: '42',
       change: { value: 12, type: 'up' as const },
-      icon: Package,
+      icon: CheckCircle,
       color: 'bg-green-100 text-green-600'
     },
     {
-      title: 'Atrasados',
-      value: '6',
-      change: { value: -2, type: 'down' as const },
+      title: 'Vendas Perdidas',
+      value: '8',
+      change: { value: -3, type: 'down' as const },
       icon: AlertTriangle,
       color: 'bg-red-100 text-red-600'
     },
     {
-      title: 'Faturamento',
+      title: 'Valor Realizado',
       value: 'R$ 125k',
       change: { value: 15, type: 'up' as const },
       icon: DollarSign,
       color: 'bg-emerald-100 text-emerald-600'
     },
     {
-      title: 'Ticket Médio',
-      value: 'R$ 1.8k',
-      change: { value: 8, type: 'up' as const },
+      title: 'Valor Perdido',
+      value: 'R$ 18k',
+      change: { value: -8, type: 'down' as const },
       icon: TrendingUp,
-      color: 'bg-indigo-100 text-indigo-600'
+      color: 'bg-red-100 text-red-600'
+    },
+    {
+      title: 'Perda por Preço',
+      value: '3',
+      change: { value: -1, type: 'down' as const },
+      icon: DollarSign,
+      color: 'bg-orange-100 text-orange-600'
+    },
+    {
+      title: 'Perda por Logística',
+      value: '2',
+      change: { value: 0, type: 'up' as const },
+      icon: Truck,
+      color: 'bg-yellow-100 text-yellow-600'
+    },
+    {
+      title: 'Falta de Produto',
+      value: '2',
+      change: { value: -1, type: 'down' as const },
+      icon: Package,
+      color: 'bg-purple-100 text-purple-600'
+    },
+    {
+      title: 'Problema Vendedor',
+      value: '1',
+      change: { value: -1, type: 'down' as const },
+      icon: AlertTriangle,
+      color: 'bg-gray-100 text-gray-600'
     }
   ];
 
@@ -421,18 +422,12 @@ export default function Pedidos() {
           </SelectContent>
         </Select>
 
-        <Select value={dateFilter} onValueChange={setDateFilter}>
-          <SelectTrigger className="w-40">
-            <Calendar className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Período" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="today">Hoje</SelectItem>
-            <SelectItem value="week">7 dias</SelectItem>
-            <SelectItem value="month">30 dias</SelectItem>
-          </SelectContent>
-        </Select>
+        <DatePeriodFilter 
+          onPeriodChange={(period, startDate, endDate) => {
+            setDateFilter(period);
+            console.log('Período selecionado:', period, startDate, endDate);
+          }}
+        />
 
         <Select value={valueFilter} onValueChange={setValueFilter}>
           <SelectTrigger className="w-40">

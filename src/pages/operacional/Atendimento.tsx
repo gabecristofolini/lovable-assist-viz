@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Search, Filter, Upload, Plus, Users, Clock, TrendingUp, MessageSquare, Phone, Video } from 'lucide-react';
+import { Search, Filter, Upload, Plus, Users, Clock, TrendingUp, MessageSquare, Phone, Video, MessageCircle } from 'lucide-react';
+import { WhatsAppModal } from '@/components/WhatsAppModal';
+import { DatePeriodFilter } from '@/components/DatePeriodFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/DataTable';
@@ -27,6 +29,7 @@ export default function Atendimento() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [selectedConversa, setSelectedConversa] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
 
   // Dados das conversas de atendimento
   const conversasAtendimento = [
@@ -188,6 +191,25 @@ export default function Atendimento() {
       key: 'hora',
       label: 'Última Atividade',
       sortable: true,
+    },
+    {
+      key: 'whatsapp',
+      label: 'WhatsApp',
+      sortable: false,
+      render: (value: string, row: any) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedConversa(row);
+            setWhatsappOpen(true);
+          }}
+        >
+          <MessageCircle className="h-4 w-4" />
+        </Button>
+      ),
     },
   ];
 
@@ -488,6 +510,21 @@ export default function Atendimento() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
       />
+
+      {selectedConversa && whatsappOpen && (
+        <WhatsAppModal
+          isOpen={whatsappOpen}
+          onClose={() => setWhatsappOpen(false)}
+          conversation={{
+            id: selectedConversa.id,
+            nome: selectedConversa.nome,
+            telefone: selectedConversa.telefone || '(11) 99999-0000',
+            online: selectedConversa.online || false,
+            ultimaMensagem: selectedConversa.ultimaMensagem,
+            hora: selectedConversa.hora
+          }}
+        />
+      )}
     </div>
   );
 }

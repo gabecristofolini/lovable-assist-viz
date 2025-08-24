@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Search, Filter, Plus, Upload, Users, Clock, DollarSign, TrendingUp, Flame, Snowflake, Target, CheckCircle } from 'lucide-react';
+import { Search, Filter, Plus, Upload, Users, Clock, DollarSign, TrendingUp, Flame, Snowflake, Target, CheckCircle, MessageCircle } from 'lucide-react';
+import { DatePeriodFilter } from '@/components/DatePeriodFilter';
+import { WhatsAppModal } from '@/components/WhatsAppModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/DataTable';
@@ -26,6 +28,8 @@ export default function LeadsKanban() {
   const [view, setView] = useState<'list' | 'kanban'>('kanban');
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<any>(null);
 
   const { leads } = mockData;
 
@@ -88,6 +92,37 @@ export default function LeadsKanban() {
       label: 'Valor',
       sortable: true,
       render: (value: number) => `R$ ${value.toLocaleString()}`,
+    },
+    {
+      key: 'ultimaMensagem',
+      label: 'Última Mensagem',
+      sortable: false,
+      render: (value: string, row: any) => (
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground truncate max-w-32">
+            {value || row.ultimaInteracao || 'Nenhuma mensagem'}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedConversation({
+                id: row.id,
+                nome: row.nome,
+                telefone: row.telefone || '(11) 99999-0000',
+                online: Math.random() > 0.5,
+                ultimaMensagem: 'Última mensagem aqui...',
+                hora: '10:30'
+              });
+              setWhatsappOpen(true);
+            }}
+          >
+            <MessageCircle className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
     {
       key: 'responsavel',
@@ -371,6 +406,14 @@ export default function LeadsKanban() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
       />
+
+      {selectedConversation && (
+        <WhatsAppModal
+          isOpen={whatsappOpen}
+          onClose={() => setWhatsappOpen(false)}
+          conversation={selectedConversation}
+        />
+      )}
     </div>
   );
 }

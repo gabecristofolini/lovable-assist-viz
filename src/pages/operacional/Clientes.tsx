@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Search, Filter, Plus, Star, Building2, Mail, Phone, Calendar, DollarSign, Upload, TrendingUp, Users, Crown, X, LayoutGrid } from 'lucide-react';
+import { Search, Filter, Plus, Star, Building2, Mail, Phone, Calendar, DollarSign, Upload, TrendingUp, Users, Crown, X, LayoutGrid, MessageCircle } from 'lucide-react';
+import { WhatsAppModal } from '@/components/WhatsAppModal';
+import { DatePeriodFilter } from '@/components/DatePeriodFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +29,8 @@ export default function Clientes() {
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [view, setView] = useState<'list' | 'kanban'>('kanban');
   const [selectedCliente, setSelectedCliente] = useState(null);
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<any>(null);
 
   const { clientes } = mockData;
 
@@ -130,6 +134,37 @@ export default function Clientes() {
       sortable: true,
       render: (value: string) => (
         <Badge className="bg-green-100 text-green-800">{value}</Badge>
+      ),
+    },
+    {
+      key: 'ultimaMensagem',
+      label: 'Última Mensagem',
+      sortable: false,
+      render: (value: string, row: any) => (
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground truncate max-w-32">
+            {row.ultimoContato || 'Nenhuma mensagem'}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedConversation({
+                id: row.id,
+                nome: row.nome,
+                telefone: row.telefone,
+                online: Math.random() > 0.5,
+                ultimaMensagem: 'Mensagem do WhatsApp...',
+                hora: '10:30'
+              });
+              setWhatsappOpen(true);
+            }}
+          >
+            <MessageCircle className="h-4 w-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -635,6 +670,14 @@ export default function Clientes() {
             Criar Novo Cliente
           </Button>
         </div>
+      )}
+
+      {selectedConversation && (
+        <WhatsAppModal
+          isOpen={whatsappOpen}
+          onClose={() => setWhatsappOpen(false)}
+          conversation={selectedConversation}
+        />
       )}
     </div>
   );

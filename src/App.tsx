@@ -28,7 +28,7 @@ import Orcamentos from "./pages/operacional/Orcamentos";
 // Cadastros
 import Campanhas from "./pages/cadastros/Campanhas";
 import Criativos from "./pages/cadastros/Criativos";
-import Clientes from "./pages/cadastros/Clientes";
+import Clientes from "./pages/operacional/Clientes";
 import Chatbots from "./pages/cadastros/Chatbots";
 import Equipes from "./pages/cadastros/Equipes";
 import Produtos from "./pages/operacional/Produtos";
@@ -50,13 +50,13 @@ const App = () => (
             {/* Cadastros */}
             <Route path="/cadastros/campanhas" element={<Campanhas />} />
             <Route path="/cadastros/criativos" element={<Criativos />} />
-            <Route path="/cadastros/clientes" element={<Clientes />} />
             <Route path="/cadastros/chatbots" element={<Chatbots />} />
             <Route path="/cadastros/equipes" element={<Equipes />} />
             
             {/* Operacional */}
             <Route path="/operacional/leads" element={<LeadsKanban />} />
             <Route path="/operacional/atendimento" element={<AtendimentoOperacional />} />
+            <Route path="/operacional/clientes" element={<Clientes />} />
             <Route path="/operacional/orcamentos" element={<Orcamentos />} />
             <Route path="/operacional/pedidos" element={<PedidosOperacional />} />
             <Route path="/operacional/produtos" element={<Produtos />} />
