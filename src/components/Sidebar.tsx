@@ -26,6 +26,7 @@ const navigation = [
   {
     section: 'Operacional',
     items: [
+      { name: 'Clientes', href: '/operacional/clientes', icon: Building2 },
       { name: 'Leads', href: '/operacional/leads', icon: Users },
       { name: 'Atendimento', href: '/operacional/atendimento', icon: MessageSquare },
       { name: 'Orçamentos', href: '/operacional/orcamentos', icon: Users },
@@ -38,7 +39,6 @@ const navigation = [
     items: [
       { name: 'Campanhas', href: '/cadastros/campanhas', icon: BarChart3 },
       { name: 'Criativos', href: '/cadastros/criativos', icon: Users },
-      { name: 'Clientes', href: '/cadastros/clientes', icon: Building2 },
       { name: 'Chatbots', href: '/cadastros/chatbots', icon: MessageSquare },
       { name: 'Equipes', href: '/cadastros/equipes', icon: Users }
     ]
